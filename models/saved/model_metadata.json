@@ -1,0 +1,34 @@
+{
+  "model_name": "Linear SVM",
+  "experiment": "E3",
+  "feature_set": "TF-IDF only",
+  "test_accuracy": 0.9864,
+  "test_macro_f1": 0.9761,
+  "test_weighted_f1": 0.9864,
+  "test_per_class": {
+    "LEGITIMATE": {
+      "precision": 0.9909,
+      "recall": 0.9877,
+      "f1": 0.9893,
+      "support": 2196
+    },
+    "PHISHING": {
+      "precision": 0.9795,
+      "recall": 0.9853,
+      "f1": 0.9824,
+      "support": 1361
+    },
+    "MALICIOUS": {
+      "precision": 0.9706,
+      "recall": 0.9429,
+      "f1": 0.9565,
+      "support": 35
+    }
+  },
+  "random_seed": 42,
+  "classes": [
+    "LEGITIMATE",
+    "PHISHING",
+    "MALICIOUS"
+  ]
+}

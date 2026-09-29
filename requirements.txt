@@ -1,0 +1,45 @@
+# ============================================
+# PHISHGUARD AI — Requirements
+# ============================================
+
+# --- Core Data Science ---
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# --- Machine Learning ---
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# --- NLP ---
+nltk>=3.8.0
+beautifulsoup4>=4.12.0
+
+# --- Visualization ---
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# --- Web Application ---
+streamlit>=1.28.0
+
+# --- Dataset Loading ---
+datasets>=2.14.0       # HuggingFace datasets library
+openpyxl>=3.1.0        # For reading .xlsx files (Zenodo dataset)
+
+# --- Configuration & Environment ---
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# --- Testing ---
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# --- Utilities ---
+tqdm>=4.65.0
+
+# --- Model Explainability (optional) ---
+# shap>=0.42.0         # Uncomment if SHAP is needed (heavy dependency)
+
+# --- Presentation ---
+python-pptx>=0.6.21    # PowerPoint generation

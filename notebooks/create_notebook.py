@@ -1,0 +1,270 @@
+"""
+Script to generate notebooks/pipeline_demonstration.ipynb
+"""
+
+import json
+from pathlib import Path
+
+notebook_data = {
+    "cells": [
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "# 🛡️ PhishGuard AI — Interactive Pipeline Demonstration\n",
+                "### NLP-Based Phishing & Malicious Email Detection and Risk Analysis System\n",
+                "\n",
+                "**Author:** Muhammad Haris  \n",
+                "**Capstone Project:** KPITB AI/ML Training Program  \n",
+                "**Taxonomy:** 3 Classes (`LEGITIMATE`, `PHISHING`, `MALICIOUS`)  \n",
+                "\n",
+                "---\n",
+                "This notebook provides a complete interactive walkthrough of the **PhishGuard AI** pipeline:\n",
+                "1. **Data Inspection**: Unified dataset and split distributions\n",
+                "2. **NLP Preprocessing**: Text normalization and token transformation\n",
+                "3. **Cybersecurity Features**: Static indicator extraction and scoring\n",
+                "4. **Model Architecture**: Feature fusion and trained linear baselines\n",
+                "5. **Evaluation**: Real performance metrics and confusion matrix\n",
+                "6. **Inference & Explainability**: Real-time risk analysis on sample emails\n"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "# Setup & Imports\n",
+                "import sys\n",
+                "from pathlib import Path\n",
+                "\n",
+                "# Add project root to sys.path\n",
+                "project_root = Path.cwd().parent if Path.cwd().name == 'notebooks' else Path.cwd()\n",
+                "if str(project_root) not in sys.path:\n",
+                "    sys.path.insert(0, str(project_root))\n",
+                "\n",
+                "import json\n",
+                "import pandas as pd\n",
+                "import numpy as np\n",
+                "from src.preprocessing.text_preprocessor import TextPreprocessor\n",
+                "from src.features.security_features import SecurityFeatureExtractor\n",
+                "from src.inference.engine import PhishGuardInference\n",
+                "from src.utils.config import DATA_PROCESSED_DIR, MODELS_DIR\n",
+                "\n",
+                "print('Environment initialized successfully!')\n",
+                "print(f'Project root: {project_root}')\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 1. Dataset Inspection & Split Distributions\n",
+                "Review the stratified train, validation, and test splits generated from the verified HuggingFace and Zenodo datasets."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "train_df = pd.read_csv(DATA_PROCESSED_DIR / 'train.csv')\n",
+                "val_df = pd.read_csv(DATA_PROCESSED_DIR / 'val.csv')\n",
+                "test_df = pd.read_csv(DATA_PROCESSED_DIR / 'test.csv')\n",
+                "\n",
+                "split_summary = pd.DataFrame({\n",
+                "    'Train (70%)': train_df['label'].value_counts(),\n",
+                "    'Val (10%)': val_df['label'].value_counts(),\n",
+                "    'Test (20%)': test_df['label'].value_counts(),\n",
+                "    'Total': train_df['label'].value_counts() + val_df['label'].value_counts() + test_df['label'].value_counts()\n",
+                "})\n",
+                "\n",
+                "print('=== PhishGuard AI Dataset Splits ===')\n",
+                "display(split_summary)\n",
+                "print(f'\\nTotal Unified Samples: {len(train_df) + len(val_df) + len(test_df):,}')\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 2. NLP Preprocessing Pipeline\n",
+                "Demonstrating the transformation from raw email content containing HTML, URLs, and noisy formatting into normalized tokens."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "sample_raw_email = \"\"\"\n",
+                "<html>\n",
+                "<body>\n",
+                "  <p><b>URGENT:</b> Your Microsoft 365 session has expired!</p>\n",
+                "  <p>Please verify your password immediately at <a href=\"http://192.168.1.1/login\">https://login-portal.xyz/verify</a></p>\n",
+                "  <p>Failure to respond within 24 hours will result in permanent suspension.</p>\n",
+                "</body>\n",
+                "</html>\n",
+                "\"\"\"\n",
+                "\n",
+                "preprocessor = TextPreprocessor(remove_stopwords=False, lemmatize=True)\n",
+                "cleaned_text = preprocessor.preprocess(sample_raw_email)\n",
+                "\n",
+                "print('=== RAW EMAIL TEXT ===')\n",
+                "print(sample_raw_email.strip())\n",
+                "print('\\n=== PREPROCESSED NLP TEXT ===')\n",
+                "print(cleaned_text)\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 3. Domain-Specific Cybersecurity Feature Extraction\n",
+                "Extracting 17 static security indicators covering urgency, credential harvesting, threat keywords, suspicious TLDs, and executable mentions."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "extractor = SecurityFeatureExtractor()\n",
+                "features = extractor.extract(sample_raw_email)\n",
+                "\n",
+                "print(f'Detected Threat Indicators ({len(features.detected_indicators)}):')\n",
+                "for ind in features.detected_indicators:\n",
+                "    print(f'  [!] {ind}')\n",
+                "\n",
+                "print('\\nExtracted Numerical Feature Vector:')\n",
+                "feature_dict = features.to_dict()\n",
+                "feat_df = pd.DataFrame([feature_dict]).T.rename(columns={0: 'Value'})\n",
+                "display(feat_df)\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 4. Benchmark Model Evaluation Results\n",
+                "Reviewing the performance across all 5 experimental configurations (E1 to E5) and the winning model on the held-out test set."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "results_path = MODELS_DIR / 'experiment_results.json'\n",
+                "if results_path.exists():\n",
+                "    with open(results_path) as f:\n",
+                "        exp_data = json.load(f)\n",
+                "    \n",
+                "    exp_df = pd.DataFrame([\n",
+                "        {\n",
+                "            'Experiment': e['name'],\n",
+                "            'Model': e['model'],\n",
+                "            'Accuracy': f\"{e['accuracy']:.4f}\",\n",
+                "            'Macro F1': f\"{e['macro_f1']:.4f}\",\n",
+                "            'Weighted F1': f\"{e['weighted_f1']:.4f}\",\n",
+                "        }\n",
+                "        for e in exp_data['experiments']\n",
+                "    ])\n",
+                "    print(f\"Best Experiment Selected: {exp_data['best_experiment']}\")\n",
+                "    display(exp_df)\n",
+                "    \n",
+                "    print('\\n=== FINAL TEST SET EVALUATION ===')\n",
+                "    test_res = exp_data['test_results']\n",
+                "    print(f\"Test Accuracy:    {test_res['accuracy']:.4f}\")\n",
+                "    print(f\"Test Macro F1:    {test_res['macro_f1']:.4f}\")\n",
+                "    print(f\"Test Weighted F1: {test_res['weighted_f1']:.4f}\")\n",
+                "else:\n",
+                "    print('Run scripts/train.py first to generate experimental results.')\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 5. Live Inference & Explainable Risk Analysis\n",
+                "Testing the end-to-end inference engine with three representative email scenarios: Legitimate, Phishing, and Malicious."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "try:\n",
+                "    engine = PhishGuardInference()\n",
+                "    \n",
+                "    test_cases = {\n",
+                "        'Legitimate Email': (\n",
+                "            'Hi Team, please find the quarterly financial presentation attached for your review. '\n",
+                "            'Let me know if you have any questions before Thursday meeting. Best regards, Sarah'\n",
+                "        ),\n",
+                "        'Phishing Email': (\n",
+                "            'URGENT NOTIFICATION: Your bank account access has been restricted due to suspicious activity. '\n",
+                "            'Click here immediately to confirm your password and restore access within 24 hours: '\n",
+                "            'http://verify-bank-portal.xyz/login'\n",
+                "        ),\n",
+                "        'Malicious Scareware/Malware': (\n",
+                "            'WARNING: Your system is infected with severe spyware trojans! '\n",
+                "            'Download and run the attached patch update_security.exe immediately to prevent complete drive encryption. '\n",
+                "            'Do not restart your computer.'\n",
+                "        )\n",
+                "    }\n",
+                "    \n",
+                "    for category, email_content in test_cases.items():\n",
+                "        print('=' * 75)\n",
+                "        print(f'TEST CASE: {category}')\n",
+                "        print('=' * 75)\n",
+                "        result = engine.predict(email_content)\n",
+                "        print(f'Predicted Class:  {result.predicted_class} (Confidence: {result.confidence:.1%})')\n",
+                "        print(f'Risk Assessment:  {result.risk_level} (Score: {result.risk_score:.3f})')\n",
+                "        print(f'Class Probabilities:')\n",
+                "        for cls, prob in result.class_probabilities.items():\n",
+                "            print(f'  - {cls}: {prob:.1%}')\n",
+                "        print(f'Detected Threat Triggers: {result.contributing_factors}')\n",
+                "        print(f'Analyst Explanation: {result.explanation}\\n')\n",
+                "except Exception as e:\n",
+                "    print(f'Inference engine error: {e}')\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 6. Summary & Defense Readiness\n",
+                "- **Reproducible**: Seed 42, deterministic TF-IDF and Linear SVM.\n",
+                "- **Robust**: Leakage-free split, preprocessed static indicators.\n",
+                "- **Operationally Sound**: <5ms CPU latency, transparent explainability."
+            ]
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "display_name": "Python 3",
+            "language": "python",
+            "name": "python3"
+        },
+        "language_info": {
+            "name": "python",
+            "version": "3.10"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 5
+}
+
+output_path = Path("D:/KPITB AI/Final project/phishguard-ai/notebooks/pipeline_demonstration.ipynb")
+output_path.parent.mkdir(parents=True, exist_ok=True)
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(notebook_data, f, indent=2)
+
+print(f"Jupyter Notebook successfully generated at: {output_path}")

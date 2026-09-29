@@ -1,0 +1,78 @@
+# ============================================
+# PHISHGUARD AI — .gitignore
+# ============================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# --- Virtual Environment ---
+venv/
+.venv/
+env/
+.env
+.env.local
+.env.*.local
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+
+# --- Data (large files) ---
+data/raw/*.csv
+data/raw/*.xlsx
+data/raw/*.parquet
+data/processed/*.csv
+data/processed/*.pkl
+data/processed/*.joblib
+
+# --- Trained Models (large files) ---
+# Allow lightweight trained model artifacts (< 2MB total) so the repo is immediately runnable
+!models/saved/*.joblib
+!models/saved/*.json
+models/saved/*.pt
+models/saved/*.bin
+models/saved/*.h5
+
+# --- Secrets ---
+*.pem
+*.key
+secrets/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Coverage ---
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# --- pytest ---
+.pytest_cache/
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+
+# --- Misc ---
+*.bak
+*.tmp
