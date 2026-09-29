@@ -16,49 +16,38 @@
 | **Final Test Set Evaluation** | ✅ COMPLETED | 98.64% Accuracy, 0.9761 Macro F1, 94.3% Malicious Recall |
 | **Model Artifacts** | ✅ COMPLETED | Saved in `models/saved/` (best_model, tfidf, config, metadata) |
 | **Inference Pipeline** | ✅ COMPLETED | Verified on Legitimate, Phishing, and Malicious sample emails |
-| **Unit Test Suite** | ✅ COMPLETED | 36/36 passing in pytest (`tests/test_core.py`) |
+| **Unit Test Suite** | ✅ COMPLETED | 48/48 passing in pytest (73.63% coverage) (`tests/`) |
 | **Streamlit Web Application** | ✅ COMPLETED | Verified via Browser Subagent at `http://localhost:8501` |
 | **Interactive Demo Notebook** | ✅ COMPLETED | `notebooks/pipeline_demonstration.ipynb` |
 | **Presentation Deck & Script** | ✅ COMPLETED | `presentation/presentation_slides.md` & `presentation/speaker_notes.md` |
+| **Git Repository** | ✅ COMPLETED | Initialized with clean working tree & initial commit (`6edf19b`) |
 
 ---
 
 ## User Quickstart (How to Run and Demo)
 
-### 1. Launch the Web Application (If restarted)
-```bash
-cd "D:\KPITB AI\Final project\phishguard-ai"
-venv\Scripts\activate
-streamlit run app/main.py
-```
-*Open `http://localhost:8501` in your browser.*
+### 1. Web Application (Already Live!)
+The application is currently running at **`http://localhost:8501`**.
+*(If you ever reboot or restart it in the future: `.\venv\Scripts\streamlit run app/main.py`)*
 
 ### 2. Run the Full Test Suite
-```bash
-cd "D:\KPITB AI\Final project\phishguard-ai"
-venv\Scripts\activate
-python -m pytest tests/test_core.py -v
+```powershell
+.\venv\Scripts\pytest --cov=src --cov-report=term-missing
 ```
 
 ### 3. Open the Demonstration Notebook
-```bash
-cd "D:\KPITB AI\Final project\phishguard-ai"
-venv\Scripts\activate
-jupyter notebook notebooks/pipeline_demonstration.ipynb
+```powershell
+.\venv\Scripts\jupyter notebook notebooks/pipeline_demonstration.ipynb
 ```
 
 ### 4. Capstone Defense & Presentation
-- **Presentation Deck:** Open `presentation/presentation_slides.md` (compatible with Marp or any markdown slide renderer).
+- **Presentation Deck:** Open `presentation/presentation_slides.md` (compatible with Marp or markdown slide renderer).
 - **Speaker Notes:** Review `presentation/speaker_notes.md` for timed verbal talking points for each slide.
 - **Viva Preparation:** Review `docs/VIVA_QA.md` for 44 comprehensive questions and answers covering NLP, ML, Cybersecurity, and project architecture.
 
-### 5. Optional: Git Commit & Remote Push
-```bash
-cd "D:\KPITB AI\Final project\phishguard-ai"
-git init
-git add .
-git commit -m "feat: complete PhishGuard AI capstone project"
-git branch -M main
-# git remote add origin <your-github-repo-url>
-# git push -u origin main
+### 5. Optional: Push to Your Personal GitHub
+A clean initial commit is already created on branch `main`. To link to your GitHub account:
+```powershell
+git remote add origin https://github.com/<your-username>/phishguard-ai.git
+git push -u origin main
 ```
