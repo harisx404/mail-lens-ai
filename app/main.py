@@ -4,7 +4,7 @@ Mail-Lens AI — Email Security Analysis Dashboard
 Streamlit web application providing email threat classification,
 risk assessment, and explainability using an NLP/ML pipeline.
 
-Developer: Muhammad Haris (S.No: 70)
+Developer: Muhammad Haris
 Program: KPITB AI/ML Training Program — Capstone Project
 Model: Calibrated Linear SVM + TF-IDF (10,000 N-Grams) — 98.64% Test Accuracy
 """
@@ -1039,7 +1039,7 @@ st.markdown(
     </div>
     <div class="student-card">
         <div class="student-name">Muhammad Haris</div>
-        <div class="student-meta">Roll / S.No: 70 · Final Project · KPITB AI/ML Training Program</div>
+        <div class="student-meta">Final Project · KPITB AI/ML Training Program</div>
     </div>
 </div>
 """,
@@ -1537,7 +1537,7 @@ st.markdown(
         </div>
         <div class="footer-author">
             Lead Developer: <span>Muhammad Haris</span>
-            <div class="footer-author-sub">Roll / S.No: 70 · Final Evaluation</div>
+            <div class="footer-author-sub">Final Project · KPITB AI/ML Training Program</div>
         </div>
     </div>
     <div class="footer-stats-grid">
