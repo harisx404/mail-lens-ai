@@ -25,6 +25,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import datetime
+import html
 import json
 import re
 
@@ -547,6 +548,80 @@ st.markdown(
         font-size: 12px;
         color: #1e40af;
     }
+
+    /* Keyword & Threat Highlighting (Red, Yellow, Green) */
+    .hl-red {
+        background-color: #fee2e2 !important;
+        color: #991b1b !important;
+        border: 1px solid #fca5a5 !important;
+        border-radius: 4px !important;
+        padding: 1px 5px !important;
+        font-weight: 700 !important;
+        display: inline-block !important;
+        line-height: 1.3 !important;
+    }
+    .hl-yellow {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border: 1px solid #fcd34d !important;
+        border-radius: 4px !important;
+        padding: 1px 5px !important;
+        font-weight: 700 !important;
+        display: inline-block !important;
+        line-height: 1.3 !important;
+    }
+    .hl-green {
+        background-color: #d1fae5 !important;
+        color: #065f46 !important;
+        border: 1px solid #6ee7b7 !important;
+        border-radius: 4px !important;
+        padding: 1px 5px !important;
+        font-weight: 700 !important;
+        display: inline-block !important;
+        line-height: 1.3 !important;
+    }
+    .email-inspector-card {
+        background: #ffffff;
+        border: 1.5px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-top: 14px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+    }
+    .inspector-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 8px;
+    }
+    .inspector-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--ink-title);
+    }
+    .inspector-legend {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .inspector-body {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #1e293b;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        max-height: 240px;
+        overflow-y: auto;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -560,6 +635,174 @@ def load_engine():
     return PhishGuardInference(MODELS_DIR)
 
 engine = load_engine()
+
+# ============================================
+# Visual Keyword Threat Highlighter Engine
+# ============================================
+def highlight_email_content(raw_text: str, is_threat: bool = True, threat_tokens: list = None) -> tuple:
+    """
+    Color-codes and highlights threat and security keywords within the email:
+      - Red: Critical threats, credential harvesting, malware attachments, lookalike domains
+      - Yellow: Urgency, panic, financial scam bait, promotional spam triggers, external URLs
+      - Green: Authentic workplace collaboration terms (for legitimate emails)
+
+    Returns (highlighted_html, red_count, yellow_count, detected_tags)
+    """
+    if not raw_text:
+        return "", 0, 0, []
+
+    # Custom threat tokens from ML model
+    extra_red = []
+    if threat_tokens:
+        for t in threat_tokens:
+            token = t.get("token", "") if isinstance(t, dict) else str(t)
+            if len(token) >= 3 and token.lower() not in {"the", "and", "for", "with", "this", "from", "that", "your"}:
+                extra_red.append(re.escape(token))
+
+    red_words = [
+        r"passwords?", r"passcode", r"log\s*in", r"login", r"sign\s*in", r"credentials?",
+        r"verify\s+your\s+account", r"confirm\s+your\s+identity", r"verify\s+your\s+identity",
+        r"reset\s+password", r"security\s+alert", r"unauthorized", r"account\s+suspension",
+        r"reactivate", r"otp", r"2fa", r"pin", r"ssn", r"social\s+security",
+        r"bank\s+account", r"banking", r"credit\s+card", r"update-verification",
+        r"secure-login-portal", r"account-alert", r"rnicrosoft", r"paypa1", r"amaz0n",
+        r"invoice_scan\.pdf\.exe", r"payload", r"exploit"
+    ]
+    if extra_red:
+        red_words.extend(extra_red[:5])
+
+    red_patterns = [
+        r"\b(?:" + "|".join(red_words) + r")\b",
+        r"\.(?:exe|scr|bat|vbs|iso|zip|js|cmd|pif|hta)\b",
+        r"https?://[^\s<>\"']*(?:rnicrosoft|paypa1|amaz0n|update|verify|login|secure|auth|\.xyz|\.top)[^\s<>\"']*",
+    ]
+
+    yellow_patterns = [
+        r"\b(?:immediately?|urgently?|within\s+24\s+hours|within\s+2\s+hours|24\s+hours|final\s+notice|final\s+warning|action\s+required|terminated|suspended|suspend|locked|expires?|immediate\s+action|restricted|restriction|limited\s+time|act\s+now|critical\s+alert|deadline|quota\s+exceeded|blocked|freeze)\b",
+        r"\b(?:winners?|winning|congratulations|inheritance|prizes?|wire\s+transfer|western\s+union|crypto(?:currency)?|bitcoins?|lottery|funds?\s+transfer|million\s+dollars|beneficiary|compensation|claim\s+now|risk\s+free|grant|donation|unclaimed|reward|100%\s+free)\b",
+        r"\b(?:buy\s+now|special\s+offer|exclusive\s+deal|viagra|guaranteed|unsubscribe|click\s+here|click\s+below|visit\s+link|free\s+gift|earn\s+extra|work\s+from\s+home)\b",
+        r"https?://[^\s<>\"']+|www\.[^\s<>\"']+",
+    ]
+
+    green_patterns = [
+        r"\b(?:meeting|agenda|deliverables?|roadmap|quarterly|project\s+sync|engineering|standup|calendar\s+invite|attached\s+report|colleagues?|team|discussion|schedule|updates?|notes|budget|approved|quarter|presentation|milestones?)\b",
+    ]
+
+    matches = []
+    detected_tags = set()
+
+    for pat in red_patterns:
+        for m in re.finditer(pat, raw_text, re.IGNORECASE):
+            matches.append((m.start(), m.end(), "red", m.group(0)))
+            detected_tags.add(m.group(0).lower())
+
+    for pat in yellow_patterns:
+        for m in re.finditer(pat, raw_text, re.IGNORECASE):
+            matches.append((m.start(), m.end(), "yellow", m.group(0)))
+            detected_tags.add(m.group(0).lower())
+
+    if not is_threat:
+        for pat in green_patterns:
+            for m in re.finditer(pat, raw_text, re.IGNORECASE):
+                matches.append((m.start(), m.end(), "green", m.group(0)))
+
+    # Sort matches by start position, prioritizing longer matches if tie
+    matches.sort(key=lambda x: (x[0], -(x[1] - x[0])))
+
+    # Filter overlaps
+    filtered_matches = []
+    last_end = 0
+    for start, end, cat, text in matches:
+        if start >= last_end:
+            filtered_matches.append((start, end, cat, text))
+            last_end = end
+
+    # Build highlighted output safely
+    out = []
+    last_idx = 0
+    red_count = 0
+    yellow_count = 0
+
+    for start, end, cat, text in filtered_matches:
+        out.append(html.escape(raw_text[last_idx:start]))
+        if cat == "red":
+            red_count += 1
+            out.append(f'<span class="hl-red">{html.escape(text)}</span>')
+        elif cat == "yellow":
+            yellow_count += 1
+            out.append(f'<span class="hl-yellow">{html.escape(text)}</span>')
+        else:
+            out.append(f'<span class="hl-green">{html.escape(text)}</span>')
+        last_idx = end
+
+    out.append(html.escape(raw_text[last_idx:]))
+    formatted = "".join(out).replace("\n", "<br>")
+    return formatted, red_count, yellow_count, list(detected_tags)
+
+
+def detect_threat_subcategory(text: str, prediction: str, red_count: int, yellow_count: int) -> dict:
+    """Classifies the email into detailed security threat categories (Phishing, Malware, Scam, Spam, or Safe)."""
+    t_lower = text.lower()
+    if prediction == "LEGITIMATE":
+        return {
+            "name": "Authentic Enterprise Communication",
+            "icon": "🛡️",
+            "badge_cls": "sb-legit",
+            "color": "#059669",
+            "desc": "Verified legitimate workplace correspondence with standard collaboration language.",
+        }
+
+    # 1. Executable malware payload
+    if any(ext in t_lower for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"]):
+        return {
+            "name": "Malware Payload Delivery (.exe)",
+            "icon": "☣️",
+            "badge_cls": "sb-mal",
+            "color": "#dc2626",
+            "desc": "Contains or references executable programs designed to compromise workstation endpoints.",
+        }
+
+    # 2. Financial Scam / Advance-Fee Fraud
+    scam_keywords = ["wire transfer", "western union", "crypto", "bitcoin", "lottery", "prize", "winner", "inheritance", "million dollars", "beneficiary", "compensation", "grant money", "funds transfer"]
+    if any(k in t_lower for k in scam_keywords):
+        return {
+            "name": "Financial Scam & Advance-Fee Fraud",
+            "icon": "💰",
+            "badge_cls": "sb-phish",
+            "color": "#d97706",
+            "desc": "Classic financial scam bait promising fake prizes, cryptocurrency, or wire transfer rewards.",
+        }
+
+    # 3. Unsolicited Commercial Spam / Marketing
+    spam_keywords = ["viagra", "buy now", "special offer", "exclusive deal", "100% free", "work from home", "earn extra cash"]
+    if any(k in t_lower for k in spam_keywords):
+        return {
+            "name": "Unsolicited Bulk Spam / Marketing",
+            "icon": "📧",
+            "badge_cls": "sb-phish",
+            "color": "#d97706",
+            "desc": "Unsolicited bulk email attempting to sell products or services through aggressive marketing.",
+        }
+
+    # 4. Credential Harvesting / Brand Spoof Phishing
+    if any(k in t_lower for k in ["login", "password", "verify", "account", "rnicrosoft", "paypa1", "credentials", "suspended", "restore-access"]):
+        return {
+            "name": "Credential Harvesting & Brand Spoof Phishing",
+            "icon": "🎣",
+            "badge_cls": "sb-phish",
+            "color": "#dc2626",
+            "desc": "Deceptive brand impersonation attempting to capture user credentials and corporate passwords.",
+        }
+
+    # 5. General threat
+    return {
+        "name": "Suspicious Social Engineering Attack",
+        "icon": "⚠️",
+        "badge_cls": "sb-phish",
+        "color": "#dc2626",
+        "desc": "Uses urgent coercion and suspicious links to manipulate the recipient.",
+    }
+
 
 # ============================================
 # Plain-English Explanation Generator (At Least 4 Reasons)
@@ -625,13 +868,27 @@ def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_t
                 "desc": "Contains links that redirect traffic to unverified external websites outside your organization."
             })
 
-        # 4. Attachment / Program File Analysis
+        # 4. Attachment / Scam / Spam / Threat Payload Analysis
         if any(ext in combined for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"]):
             reasons.append({
                 "type": "threat",
                 "icon": "📎",
                 "title": "4. Dangerous Program File (.exe)",
                 "desc": "References an executable program (.exe) that can secretly install malware or ransomware on your PC."
+            })
+        elif any(k in combined for k in ["wire transfer", "western union", "crypto", "bitcoin", "lottery", "prize", "winner", "inheritance", "million dollars", "beneficiary"]):
+            reasons.append({
+                "type": "threat",
+                "icon": "💰",
+                "title": "4. Financial Scam / Fraud Lure",
+                "desc": "Uses classic financial scam lures (fake prizes, cryptocurrency, or wire transfer promises) to defraud you."
+            })
+        elif any(k in combined for k in ["viagra", "buy now", "special offer", "exclusive deal", "unsubscribe"]):
+            reasons.append({
+                "type": "threat",
+                "icon": "📧",
+                "title": "4. Commercial Bulk Spam Pattern",
+                "desc": "Contains unsolicited sales marketing buzzwords and aggressive promotional patterns typical of spam."
             })
         else:
             reasons.append({
@@ -857,6 +1114,69 @@ start_t = datetime.datetime.now()
 res = engine.analyze(text=curr_body, subject=curr_subj, sender=curr_sender)
 latency_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
 
+# Compute Visual Threat Keyword Highlights
+is_threat = res.prediction != "LEGITIMATE"
+highlighted_body, r_body, y_body, tags_body = highlight_email_content(
+    curr_body, is_threat=is_threat, threat_tokens=res.top_threat_tokens
+)
+highlighted_subj, r_subj, y_subj, tags_subj = highlight_email_content(
+    curr_subj, is_threat=is_threat
+)
+highlighted_sender, r_send, y_send, tags_send = highlight_email_content(
+    curr_sender, is_threat=is_threat
+)
+
+total_red = r_body + r_subj + r_send
+total_yellow = y_body + y_subj + y_send
+threat_subcat = detect_threat_subcategory(
+    (curr_sender + " " + curr_subj + " " + curr_body),
+    res.prediction,
+    total_red,
+    total_yellow,
+)
+
+# Render Visual Keyword Threat Highlighter (Email Inspector Card)
+st.markdown(
+    f"""
+<div class="email-inspector-card">
+    <div class="inspector-header">
+        <div class="inspector-title">
+            🔍 Visual Keyword Threat Highlighter (Email Inspector)
+        </div>
+        <div class="inspector-legend">
+            <span class="hl-red">🔴 Red: Critical Threat / Credentials / Payload</span>
+            <span class="hl-yellow">🟡 Yellow: Urgency / Scam / External Links</span>
+            <span class="hl-green">🟢 Green: Authentic Workplace</span>
+        </div>
+    </div>
+    <div class="inspector-body">
+        <div style="margin-bottom: 6px; font-size: 14px; color: #475569;">
+            <strong style="color: #0f172a;">From:</strong> {highlighted_sender if highlighted_sender else '<span style="color: #94a3b8; font-style: italic;">(None provided)</span>'}
+        </div>
+        <div style="margin-bottom: 8px; font-size: 14px; color: #475569;">
+            <strong style="color: #0f172a;">Subject:</strong> {highlighted_subj if highlighted_subj else '<span style="color: #94a3b8; font-style: italic;">(None provided)</span>'}
+        </div>
+        <hr style="margin: 8px 0 10px 0; border: none; border-top: 1px dashed #cbd5e1;">
+        <div style="font-size: 14px; line-height: 1.6; color: #1e293b;">
+            {highlighted_body if highlighted_body else '<span style="color: #94a3b8; font-style: italic;">(Empty email body)</span>'}
+        </div>
+    </div>
+    <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; font-family: 'JetBrains Mono', monospace;">
+            <span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; border: 1px solid #fca5a5; font-weight: 700;">🔴 Critical Threats: {total_red}</span>
+            <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; border: 1px solid #fcd34d; font-weight: 700;">🟡 Urgency / Scam Triggers: {total_yellow}</span>
+        </div>
+        <div style="font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: {threat_subcat['color']};">
+            <span>Threat Taxonomy: <strong>{threat_subcat['icon']} {threat_subcat['name']}</strong></span>
+        </div>
+    </div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+st.write("")
+
 # ============================================
 # 4. TWO COLUMNS: CLASSIFICATION & REASONS
 # ============================================
@@ -1033,7 +1353,7 @@ st.markdown(
 )
 
 # ============================================
-# 6. ENLARGED EXECUTIVE PRESENTATION FOOTER (1920x1080)
+# 6. EXECUTIVE PRESENTATION FOOTER
 # ============================================
 st.markdown(
     """
@@ -1042,12 +1362,12 @@ st.markdown(
         <div>
             <div class="footer-title">🛡️ PhishGuard AI — Executive Capstone Presentation</div>
             <div class="footer-sub">
-                Final Project · <strong>KPITB AI/ML Training Program</strong> (Directorate of Science & Technology, Khyber Pakhtunkhwa)
+                Final Project · <strong>KPITB AI/ML Training Program</strong>
             </div>
         </div>
         <div class="footer-author">
             Lead Developer: <span>Muhammad Haris</span>
-            <div class="footer-author-sub">Roll / S.No: 70 · Peshawar Center · Final Evaluation</div>
+            <div class="footer-author-sub">Roll / S.No: 70 · Final Evaluation</div>
         </div>
     </div>
     <div class="footer-stats-grid">
@@ -1077,7 +1397,6 @@ st.markdown(
             Training Dataset: <strong>Enron Corporate & Real Phishing Email Corpora (82,486 emails)</strong>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <span class="footer-badge-pill">🖥️ 1920x1080 Full HD Optimized</span>
             <span class="footer-badge-pill">⚡ Real-Time NLP Pipeline</span>
             <span class="footer-badge-pill">KPITB AI/ML 2026</span>
         </div>
