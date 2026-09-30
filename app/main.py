@@ -365,23 +365,137 @@ st.markdown(
         line-height: 1.4;
     }
 
-    /* Form Inputs */
-    .stTextInput > div > div > input, .stTextArea > div > div > textarea {
+    /* ========================================= */
+    /* Streamlit Input & Textarea Elements       */
+    /* ========================================= */
+    div[data-testid="stTextInput"] div[data-baseweb="base-input"],
+    div[data-testid="stTextArea"] div[data-baseweb="textarea"] {
         background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #0f172a !important;
-        font-size: 13px !important;
-        border-radius: 6px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+        transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
-    .stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus {
+
+    div[data-testid="stTextInput"] div[data-baseweb="base-input"]:focus-within,
+    div[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within {
         border-color: #2563eb !important;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
     }
-    .stButton > button {
-        border-radius: 6px !important;
+
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextArea"] textarea {
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color: #0f172a !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        line-height: 1.5 !important;
+        padding: 8px 12px !important;
+    }
+
+    /* Input & Textarea Labels */
+    div[data-testid="stTextInput"] label,
+    div[data-testid="stTextArea"] label {
+        margin-bottom: 2px !important;
+    }
+    div[data-testid="stTextInput"] label p,
+    div[data-testid="stTextArea"] label p {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: #475569 !important;
+        margin: 0 !important;
+    }
+
+    /* ========================================= */
+    /* Streamlit Scenario Preset Buttons         */
+    /* ========================================= */
+    div[data-testid="stButton"] button {
+        background-color: #ffffff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        color: #1e293b !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
-        font-size: 13px !important;
-        transition: all 0.2s ease;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        padding: 4px 10px !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        cursor: pointer !important;
+        width: 100% !important;
+    }
+    div[data-testid="stButton"] button:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        color: #1d4ed8 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.12) !important;
+    }
+    div[data-testid="stButton"] button:active {
+        transform: translateY(0px) !important;
+        background-color: #dbeafe !important;
+    }
+    div[data-testid="stButton"] button p {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: inherit !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* ========================================= */
+    /* Primary Submit Button                     */
+    /* ========================================= */
+    div[data-testid="stFormSubmitButton"] button {
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        padding: 10px 20px !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        width: 100% !important;
+    }
+    div[data-testid="stFormSubmitButton"] button:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4) !important;
+        transform: translateY(-1px) !important;
+    }
+    div[data-testid="stFormSubmitButton"] button:active {
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2) !important;
+    }
+    div[data-testid="stFormSubmitButton"] button p {
+        color: #ffffff !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 </style>
 """,
@@ -400,8 +514,11 @@ engine = load_engine()
 # ============================================
 # Predefined Scenarios (Session State Integrated)
 # ============================================
+# ============================================
+# Predefined Scenarios (Session State Integrated)
+# ============================================
 SCENARIOS = {
-    "🚨 Credential Phishing (O365)": {
+    "🚨 Credential Phish": {
         "sender": "helpdesk@corporate-verify-auth.xyz",
         "subject": "FINAL NOTICE: Mailbox Storage Quota Exceeded",
         "body": (
@@ -412,7 +529,7 @@ SCENARIOS = {
             "Failure to update will result in permanent account deactivation.\nIT Service Desk"
         ),
     },
-    "🛡️ Adversarial Spoof (rnicrosoft.com)": {
+    "🛡️ Spoofed Brand": {
         "sender": "support@rnicrosoft.com",
         "subject": "Microsoft Security Team — SIMULATION",
         "body": (
@@ -425,7 +542,7 @@ SCENARIOS = {
             "Microsoft Security Team\nThis is a cybersecurity training simulation."
         ),
     },
-    "💻 Malware Delivery (.exe)": {
+    "💻 Malware (.exe)": {
         "sender": "accounting@billing-gateway.net",
         "subject": "URGENT: Overdue Vendor Invoice INV-2026-8819",
         "body": (
@@ -435,7 +552,7 @@ SCENARIOS = {
             "You must execute this update within 2 hours to avoid commercial credit freeze.\nAccounts Payable Department"
         ),
     },
-    "✅ Legitimate Meeting Digest": {
+    "✅ Legitimate Digest": {
         "sender": "sarah.jenkins@company.com",
         "subject": "Agenda for Thursday Engineering All-Hands",
         "body": (
@@ -450,13 +567,13 @@ SCENARIOS = {
     },
 }
 
-# Initialize session state with default scenario
-if "input_sender" not in st.session_state:
-    st.session_state.input_sender = SCENARIOS["🛡️ Adversarial Spoof (rnicrosoft.com)"]["sender"]
-if "input_subject" not in st.session_state:
-    st.session_state.input_subject = SCENARIOS["🛡️ Adversarial Spoof (rnicrosoft.com)"]["subject"]
-if "input_body" not in st.session_state:
-    st.session_state.input_body = SCENARIOS["🛡️ Adversarial Spoof (rnicrosoft.com)"]["body"]
+DEFAULT_PRESET = "🛡️ Spoofed Brand"
+if "form_sender_input" not in st.session_state:
+    st.session_state["form_sender_input"] = SCENARIOS[DEFAULT_PRESET]["sender"]
+if "form_subject_input" not in st.session_state:
+    st.session_state["form_subject_input"] = SCENARIOS[DEFAULT_PRESET]["subject"]
+if "form_body_input" not in st.session_state:
+    st.session_state["form_body_input"] = SCENARIOS[DEFAULT_PRESET]["body"]
 
 # ============================================
 # TOP EXECUTIVE HEADER
@@ -492,16 +609,15 @@ st.markdown(
 # ============================================
 # 1-CLICK PRESET BUTTONS
 # ============================================
-st.markdown('<div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 4px;">⚡ Load Test Scenarios:</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 4px;">⚡ Load Test Scenarios (1-Click):</div>', unsafe_allow_html=True)
 p_cols = st.columns(4)
 
-preset_names = list(SCENARIOS.keys())
-for i, name in enumerate(preset_names):
+for i, name in enumerate(SCENARIOS.keys()):
     with p_cols[i]:
         if st.button(name, use_container_width=True):
-            st.session_state.input_sender = SCENARIOS[name]["sender"]
-            st.session_state.input_subject = SCENARIOS[name]["subject"]
-            st.session_state.input_body = SCENARIOS[name]["body"]
+            st.session_state["form_sender_input"] = SCENARIOS[name]["sender"]
+            st.session_state["form_subject_input"] = SCENARIOS[name]["subject"]
+            st.session_state["form_body_input"] = SCENARIOS[name]["body"]
             st.rerun()
 
 st.write("")
@@ -530,19 +646,19 @@ with col_left:
         with c_s1:
             sender_val = st.text_input(
                 "Sender Email Address",
-                value=st.session_state.input_sender,
+                key="form_sender_input",
                 placeholder="e.g. support@rnicrosoft.com",
             )
         with c_s2:
             subject_val = st.text_input(
                 "Email Subject",
-                value=st.session_state.input_subject,
+                key="form_subject_input",
                 placeholder="e.g. Unusual sign-in attempt",
             )
 
         body_val = st.text_area(
             "Email Body Content, Links, or Raw Text:",
-            value=st.session_state.input_body,
+            key="form_body_input",
             height=190,
             max_chars=MAX_EMAIL_LENGTH,
             placeholder="Paste complete email body or suspicious URLs...",
@@ -551,23 +667,22 @@ with col_left:
         # Dynamic alerts right in the form
         if sender_val and "rnicrosoft" in sender_val.lower():
             st.markdown(
-                '<div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 5px 8px; font-size: 11px; color: #b45309; margin-bottom: 8px;">⚠️ <strong>Homoglyph Typosquatting:</strong> \'rn\' substitutes for \'m\' (<code>rnicrosoft.com</code> simulates <code>microsoft.com</code>)</div>',
+                '<div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; color: #b45309; margin-bottom: 8px;">⚠️ <strong>Homoglyph Typosquatting:</strong> \'rn\' substitutes for \'m\' (<code>rnicrosoft.com</code> simulates <code>microsoft.com</code>)</div>',
                 unsafe_allow_html=True,
             )
         if body_val and any(ext in body_val.lower() for ext in [".exe", ".scr", ".bat", ".pdf.exe"]):
             st.markdown(
-                '<div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; padding: 5px 8px; font-size: 11px; color: #dc2626; margin-bottom: 8px;">📎 <strong>Payload Flag:</strong> Dangerous executable mention detected in content</div>',
+                '<div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; color: #dc2626; margin-bottom: 8px;">📎 <strong>Payload Flag:</strong> Dangerous executable mention detected in content</div>',
                 unsafe_allow_html=True,
             )
 
         submitted = st.form_submit_button(
             "⚡ Run AI Security & NLP Classification",
-            type="primary",
             use_container_width=True,
         )
 
     # Pre-Classification Feature Telemetry
-    active_text = body_val if submitted else st.session_state.input_body
+    active_text = body_val if body_val else st.session_state.get("form_body_input", "")
     entropy = compute_shannon_entropy(active_text)
     tok_count = len(active_text.split()) if active_text else 0
     link_count = len(re.findall(r"https?://\S+|www\.\S+", active_text)) if active_text else 0
@@ -611,9 +726,9 @@ with col_right:
         unsafe_allow_html=True,
     )
 
-    curr_body = body_val if submitted else st.session_state.input_body
-    curr_subj = subject_val if submitted else st.session_state.input_subject
-    curr_sender = sender_val if submitted else st.session_state.input_sender
+    curr_body = body_val if body_val else st.session_state.get("form_body_input", "")
+    curr_subj = subject_val if subject_val else st.session_state.get("form_subject_input", "")
+    curr_sender = sender_val if sender_val else st.session_state.get("form_sender_input", "")
 
     if not curr_body.strip() and not curr_subj.strip():
         st.info("Enter email text or select a preset scenario to classify.")
