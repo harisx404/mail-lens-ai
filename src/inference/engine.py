@@ -42,9 +42,12 @@ class AnalysisResult:
     detected_indicators: List[str] = field(default_factory=list)
     indicator_count: int = 0
 
-    # Explainability
+    # Explainability & AI Insights
     explanation: str = ""             # Human-readable explanation
     recommendation: str = ""          # Action recommendation
+    top_threat_tokens: List[Dict[str, Any]] = field(default_factory=list)
+    top_safe_tokens: List[Dict[str, Any]] = field(default_factory=list)
+    pipeline_trace: Dict[str, Any] = field(default_factory=dict)
 
     # Input metadata
     email_snippet: str = ""           # First N chars of input (for history)
@@ -62,6 +65,9 @@ class AnalysisResult:
             "indicator_count": self.indicator_count,
             "explanation": self.explanation,
             "recommendation": self.recommendation,
+            "top_threat_tokens": self.top_threat_tokens,
+            "top_safe_tokens": self.top_safe_tokens,
+            "pipeline_trace": self.pipeline_trace,
         }
 
 
@@ -306,6 +312,89 @@ class PhishGuardInference:
             )
         return "Exercise caution with this email."
 
+    def _extract_nlp_insights(self, full_text: str, prediction: str) -> tuple:
+        """
+        Extract NLP feature importance and pipeline traces for AI explainability.
+
+        Computes exact TF-IDF token contributions by projecting input n-grams
+        against the calibrated Linear SVM decision boundary hyperplane.
+        """
+        top_threat_tokens = []
+        top_safe_tokens = []
+        pipeline_trace = {}
+
+        try:
+            if not self.feature_engineer or not self.feature_engineer.tfidf_vectorizer:
+                return top_threat_tokens, top_safe_tokens, pipeline_trace
+
+            preprocessor = self.feature_engineer.preprocessor
+            cleaned_text = preprocessor.preprocess(full_text)
+            raw_tokens = cleaned_text.split()
+
+            vectorizer = self.feature_engineer.tfidf_vectorizer
+            vec = vectorizer.transform([cleaned_text])
+            feature_names = np.array(vectorizer.get_feature_names_out())
+
+            indices = vec.indices
+            data = vec.data
+
+            pipeline_trace = {
+                "raw_char_count": len(full_text),
+                "raw_word_count": len(full_text.split()),
+                "cleaned_text": cleaned_text,
+                "token_count": len(raw_tokens),
+                "vocab_match_count": int(len(indices)),
+                "total_vocab_size": len(vectorizer.vocabulary_),
+                "total_feature_dimensions": 10020,
+            }
+
+            # Extract base linear model coefficients
+            base_model = self.model
+            if hasattr(self.model, "calibrated_classifiers_"):
+                base_model = self.model.calibrated_classifiers_[0].estimator
+
+            if hasattr(base_model, "coef_") and len(indices) > 0:
+                coefs = base_model.coef_  # Shape: (3, 10000)
+
+                # Class 0: LEGITIMATE, Class 1: PHISHING, Class 2: MALICIOUS
+                threat_class_idx = 2 if prediction == "MALICIOUS" else 1
+                threat_coefs = coefs[threat_class_idx]
+                legit_coefs = coefs[0]
+
+                threat_items = []
+                safe_items = []
+
+                for idx, val in zip(indices, data):
+                    word = str(feature_names[idx])
+                    t_impact = float(threat_coefs[idx] * val)
+                    l_impact = float(legit_coefs[idx] * val)
+
+                    if t_impact > 0.001:
+                        threat_items.append({
+                            "token": word,
+                            "tfidf": round(float(val), 3),
+                            "weight": round(float(threat_coefs[idx]), 3),
+                            "impact": round(t_impact, 3),
+                        })
+                    if l_impact > 0.001:
+                        safe_items.append({
+                            "token": word,
+                            "tfidf": round(float(val), 3),
+                            "weight": round(float(legit_coefs[idx]), 3),
+                            "impact": round(l_impact, 3),
+                        })
+
+                threat_items.sort(key=lambda x: x["impact"], reverse=True)
+                safe_items.sort(key=lambda x: x["impact"], reverse=True)
+
+                top_threat_tokens = threat_items[:8]
+                top_safe_tokens = safe_items[:8]
+
+        except Exception as e:
+            logger.warning(f"Could not extract NLP insights: {e}")
+
+        return top_threat_tokens, top_safe_tokens, pipeline_trace
+
     def analyze(
         self,
         text: str,
@@ -396,6 +485,11 @@ class PhishGuardInference:
             prediction, risk_level, security_features.detected_indicators
         )
 
+        # Extract AI / NLP explainability insights
+        top_threat_tokens, top_safe_tokens, pipeline_trace = self._extract_nlp_insights(
+            full_text, prediction
+        )
+
         return AnalysisResult(
             prediction=prediction,
             confidence=confidence,
@@ -407,6 +501,9 @@ class PhishGuardInference:
             indicator_count=security_features.total_indicators,
             explanation=explanation,
             recommendation=recommendation,
+            top_threat_tokens=top_threat_tokens,
+            top_safe_tokens=top_safe_tokens,
+            pipeline_trace=pipeline_trace,
             email_snippet=full_text[:100] + "..." if len(full_text) > 100 else full_text,
         )
 

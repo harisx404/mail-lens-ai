@@ -88,6 +88,11 @@ class FeatureEngineer:
         """Whether the vectorizer and feature extractor have been fitted."""
         return self._is_fitted
 
+    @property
+    def tfidf_vectorizer(self) -> TfidfVectorizer:
+        """Alias for vectorizer for explicit NLP naming."""
+        return self.vectorizer
+
     def _preprocess_texts(self, texts: pd.Series) -> list:
         """Apply NLP preprocessing to a series of texts."""
         logger.info(f"Preprocessing {len(texts)} texts...")
