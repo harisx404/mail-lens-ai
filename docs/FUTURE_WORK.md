@@ -1,4 +1,4 @@
-# PhishGuard AI — Future Work
+# Mail-Lens AI — Future Work
 
 ## Potential Improvements
 

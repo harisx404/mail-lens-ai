@@ -1,4 +1,4 @@
-# PhishGuard AI — Project Blueprint
+# Mail-Lens AI — Project Blueprint
 
 ## Vision
 
@@ -64,7 +64,7 @@ Phishing emails remain a primary vector for cyberattacks, causing billions of do
 
 ```
 ┌──────────────────────────────────────────────────┐
-│                  PHISHGUARD AI                   │
+│                   MAIL-LENS AI                   │
 │                                                  │
 │  Input Layer                                     │
 │  ┌──────────────────────────────────────────┐    │

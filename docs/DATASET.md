@@ -1,8 +1,8 @@
-# PhishGuard AI — Dataset Documentation
+# Mail-Lens AI — Dataset Documentation
 
 ## Overview
 
-PhishGuard AI uses a combined dataset from two verified public sources to train a three-class email classifier.
+Mail-Lens AI uses a combined dataset from two verified public sources to train a three-class email classifier.
 
 ---
 

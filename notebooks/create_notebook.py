@@ -11,7 +11,7 @@ notebook_data = {
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "# 🛡️ PhishGuard AI — Interactive Pipeline Demonstration\n",
+                "# 🔍 Mail-Lens AI — Interactive Pipeline Demonstration\n",
                 "### NLP-Based Phishing & Malicious Email Detection and Risk Analysis System\n",
                 "\n",
                 "**Author:** Muhammad Haris  \n",
@@ -19,7 +19,7 @@ notebook_data = {
                 "**Taxonomy:** 3 Classes (`LEGITIMATE`, `PHISHING`, `MALICIOUS`)  \n",
                 "\n",
                 "---\n",
-                "This notebook provides a complete interactive walkthrough of the **PhishGuard AI** pipeline:\n",
+                "This notebook provides a complete interactive walkthrough of the **Mail-Lens AI** pipeline:\n",
                 "1. **Data Inspection**: Unified dataset and split distributions\n",
                 "2. **NLP Preprocessing**: Text normalization and token transformation\n",
                 "3. **Cybersecurity Features**: Static indicator extraction and scoring\n",
@@ -48,7 +48,7 @@ notebook_data = {
                 "import numpy as np\n",
                 "from src.preprocessing.text_preprocessor import TextPreprocessor\n",
                 "from src.features.security_features import SecurityFeatureExtractor\n",
-                "from src.inference.engine import PhishGuardInference\n",
+                "from src.inference.engine import MailLensInference\n",
                 "from src.utils.config import DATA_PROCESSED_DIR, MODELS_DIR\n",
                 "\n",
                 "print('Environment initialized successfully!')\n",
@@ -80,7 +80,7 @@ notebook_data = {
                 "    'Total': train_df['label'].value_counts() + val_df['label'].value_counts() + test_df['label'].value_counts()\n",
                 "})\n",
                 "\n",
-                "print('=== PhishGuard AI Dataset Splits ===')\n",
+                "print('=== Mail-Lens AI Dataset Splits ===')\n",
                 "display(split_summary)\n",
                 "print(f'\\nTotal Unified Samples: {len(train_df) + len(val_df) + len(test_df):,}')\n"
             ]
@@ -201,7 +201,7 @@ notebook_data = {
             "outputs": [],
             "source": [
                 "try:\n",
-                "    engine = PhishGuardInference()\n",
+                "    engine = MailLensInference()\n",
                 "    \n",
                 "    test_cases = {\n",
                 "        'Legitimate Email': (\n",
@@ -262,7 +262,7 @@ notebook_data = {
     "nbformat_minor": 5
 }
 
-output_path = Path("D:/KPITB AI/Final project/phishguard-ai/notebooks/pipeline_demonstration.ipynb")
+output_path = Path(__file__).parent / "pipeline_demonstration.ipynb"
 output_path.parent.mkdir(parents=True, exist_ok=True)
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(notebook_data, f, indent=2)

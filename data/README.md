@@ -1,4 +1,4 @@
-# PhishGuard AI — Data Directory
+# Mail-Lens AI — Data Directory
 
 ## Structure
 

@@ -1,4 +1,4 @@
-# PhishGuard AI — Completed Verification & User Quickstart
+# Mail-Lens AI — Completed Verification & User Quickstart
 
 > All development, data download, feature engineering, model training, evaluation, browser testing, and documentation tasks have been **100% completed autonomously**.
 
@@ -48,6 +48,6 @@ The application is currently running at **`http://localhost:8501`**.
 ### 5. Optional: Push to Your Personal GitHub
 A clean initial commit is already created on branch `main`. To link to your GitHub account:
 ```powershell
-git remote add origin https://github.com/<your-username>/phishguard-ai.git
+git remote add origin https://github.com/<your-username>/mail-lens-ai.git
 git push -u origin main
 ```

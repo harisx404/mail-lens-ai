@@ -1,4 +1,4 @@
-# PhishGuard AI — NLP Pipeline Documentation
+# Mail-Lens AI — NLP Pipeline Documentation
 
 ## Overview
 

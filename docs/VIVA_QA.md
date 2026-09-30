@@ -1,4 +1,4 @@
-# PhishGuard AI — Viva Questions & Answers
+# Mail-Lens AI — Viva Questions & Answers
 
 > **40+ realistic questions covering NLP, ML, Cybersecurity, Evaluation, and the Project.**
 > All answers match the actual implementation.
@@ -8,7 +8,7 @@
 ## NLP Questions
 
 ### Q1: What is NLP?
-**A:** Natural Language Processing (NLP) is a branch of AI that enables computers to understand, interpret, and process human language. In PhishGuard AI, NLP is used to analyze the textual content of emails to identify patterns associated with phishing and malicious emails.
+**A:** Natural Language Processing (NLP) is a branch of AI that enables computers to understand, interpret, and process human language. In Mail-Lens AI, NLP is used to analyze the textual content of emails to identify patterns associated with phishing and malicious emails.
 
 ### Q2: Why is NLP useful for phishing detection?
 **A:** Phishing emails rely on language patterns — urgency, deception, impersonation. NLP can learn these linguistic patterns from training data and generalize to detect similar patterns in unseen emails. Simple keyword matching fails because attackers vary their wording; NLP captures statistical patterns across thousands of examples.
@@ -22,7 +22,7 @@
 - **IDF (Inverse Document Frequency):** How rare the word is across all documents
 - **TF-IDF = TF × IDF:** High for words that are frequent in this document but rare overall
 
-In PhishGuard AI, we use TF-IDF to convert email text into numerical feature vectors with up to 10,000 features (unigrams + bigrams).
+In Mail-Lens AI, we use TF-IDF to convert email text into numerical feature vectors with up to 10,000 features (unigrams + bigrams).
 
 ### Q5: What is an n-gram?
 **A:** An n-gram is a contiguous sequence of n items from text. A unigram is a single word ("urgent"), a bigram is two consecutive words ("verify account"), a trigram is three ("click here now"). We use (1,2)-grams (unigrams + bigrams) to capture both individual words and common phrases.
@@ -73,7 +73,7 @@ In PhishGuard AI, we use TF-IDF to convert email text into numerical feature vec
 **A:** Underfitting occurs when a model is too simple to capture the underlying patterns. Signs include low accuracy on both training and test data. If our models showed very poor performance, we would need more complex features or models.
 
 ### Q15: What is train/test data leakage?
-**A:** Data leakage occurs when information from the test set influences the training process, leading to artificially inflated metrics. In PhishGuard AI, we prevent leakage by:
+**A:** Data leakage occurs when information from the test set influences the training process, leading to artificially inflated metrics. In Mail-Lens AI, we prevent leakage by:
 - Splitting data BEFORE any preprocessing or feature extraction
 - Fitting the TF-IDF vectorizer ONLY on training data
 - Transforming (not fitting) validation and test data

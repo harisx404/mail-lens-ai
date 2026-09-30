@@ -1,14 +1,14 @@
-# PhishGuard AI — Project Master Guide
+# Mail-Lens AI — Project Master Guide
 
 ## Complete Beginner-Friendly Explanation
 
-This guide explains the entire PhishGuard AI project in plain language, suitable for capstone presentation, viva defense, and future reference.
+This guide explains the entire Mail-Lens AI project in plain language, suitable for capstone presentation, viva defense, and future reference.
 
 ---
 
 ## Part 1: What Does This Project Do?
 
-PhishGuard AI analyzes email content and answers one question: **"Is this email safe, a phishing attempt, or carrying malicious content?"**
+Mail-Lens AI analyzes email content and answers one question: **"Is this email safe, a phishing attempt, or carrying malicious content?"**
 
 Think of it as a smart email security assistant that reads an email and tells you:
 1. **What it is** — Legitimate, Phishing, or Malicious
@@ -126,7 +126,7 @@ The system detects specific patterns:
 ## Part 5: Code Architecture
 
 ```
-phishguard-ai/
+mail-lens-ai/
 ├── src/
 │   ├── data/
 │   │   ├── loader.py          # Downloads and loads raw datasets
@@ -204,7 +204,7 @@ We use **sublinear TF** (log normalization) to prevent very frequent words from 
 ### Quick Start
 ```bash
 # Setup
-cd "D:\KPITB AI\Final project\phishguard-ai"
+cd mail-lens-ai
 venv\Scripts\activate
 
 # Train
