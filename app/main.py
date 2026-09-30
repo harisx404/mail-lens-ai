@@ -1530,7 +1530,7 @@ st.markdown(
 <div class="footer-card">
     <div class="footer-top-row">
         <div>
-            <div class="footer-title">🛡️ PhishGuard AI — Executive Capstone Presentation</div>
+            <div class="footer-title">🔍 Mail-Lens AI — Email Security Analysis</div>
             <div class="footer-sub">
                 Final Project · <strong>KPITB AI/ML Training Program</strong>
             </div>

@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Extended Test Suite
+Mail-Lens AI — Extended Test Suite
 
 Comprehensive tests for:
   - FeatureEngineer pipeline (fit, transform, serialization)

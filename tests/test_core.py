@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Test Suite
+Mail-Lens AI — Test Suite
 
 Tests for:
   - Text preprocessing
