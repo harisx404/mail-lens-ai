@@ -1,53 +1,73 @@
-# Mail-Lens AI — Completed Verification & User Quickstart
+# Mail-Lens AI — Quickstart & Execution Guide
 
-> All development, data download, feature engineering, model training, evaluation, browser testing, and documentation tasks have been **100% completed autonomously**.
+This guide outlines the verified system status and instructions for running, testing, and demonstrating the **Mail-Lens AI** email threat classification system.
 
 ---
 
-## Autonomous Verification Summary
+## System Status & Component Verification
 
-| Component | Automated Status | Verification Evidence |
+| Component | Status | Details |
 |---|---|---|
-| **Python Virtual Environment** | ✅ COMPLETED | `venv/` with scikit-learn, streamlit, nltk, datasets, pandas, openpyxl |
-| **Dataset Ingestion** | ✅ COMPLETED | HuggingFace (18,650) + Zenodo TSV (624) -> 17,960 unified samples |
-| **Data Leakage Control** | ✅ COMPLETED | Stratified 70/10/20 pre-split (12,572 train / 1,796 val / 3,592 test) |
-| **Feature Engineering** | ✅ COMPLETED | 10,000 TF-IDF N-grams (Model E3) + 20 Cybersecurity Domain Rules |
-| **Model Benchmarks (E1-E5)** | ✅ COMPLETED | Winner: Linear SVM (E3) with Val Macro F1 = 0.9760 |
-| **Final Test Set Evaluation** | ✅ COMPLETED | 98.64% Accuracy, 0.9761 Macro F1, 94.3% Malicious Recall |
-| **Model Artifacts** | ✅ COMPLETED | Saved in `models/saved/` (best_model, tfidf, config, metadata) |
-| **Inference Pipeline** | ✅ COMPLETED | Verified on Legitimate, Phishing, and Malicious sample emails |
-| **Unit Test Suite** | ✅ COMPLETED | 71/71 passing in pytest (76.77% coverage) (`tests/`) |
-| **Streamlit Web Application** | ✅ COMPLETED | Verified via Browser Subagent at `http://localhost:8501` |
-| **Interactive Demo Notebook** | ✅ COMPLETED | `notebooks/pipeline_demonstration.ipynb` |
-| **Presentation Deck & Script** | ✅ COMPLETED | `presentation/presentation_slides.md` & `presentation/speaker_notes.md` |
-| **Git Repository** | ✅ COMPLETED | Initialized with clean working tree & initial commit (`6edf19b`) |
+| **Python Environment** | Configured | Python 3.10+ virtual environment (`venv/`) with scikit-learn, streamlit, nltk, pandas, scipy |
+| **Dataset Ingestion** | Verified | Curated corpus of 17,960 emails (HuggingFace + Zenodo), deduplicated and cleaned |
+| **Data Partitioning** | Verified | Stratified 70/10/20 train/val/test splits (12,572 train / 1,796 val / 3,592 test) |
+| **Feature Extraction** | Verified | 10,000 TF-IDF n-grams (unigram + bigram) + 20 cybersecurity domain heuristics |
+| **Model Benchmark** | Verified | 5-model evaluation; production model: Calibrated Linear SVM (Val Macro F1 = 0.9760) |
+| **Test Performance** | Verified | 98.64% Test Accuracy, 0.9761 Macro F1 on 3,592 holdout test samples |
+| **Model Artifacts** | Verified | Serialized in `models/saved/` (`best_model.joblib`, `tfidf_vectorizer.joblib`, metadata) |
+| **Inference Engine** | Verified | Sub-15ms CPU inference with Platt-scaled probabilities and plain-English reasons |
+| **Test Suite** | Verified | 71/71 tests passing (100% pass rate, 76.77% code coverage) in Pytest |
+| **Web Dashboard** | Verified | Interactive Streamlit web UI with keyword threat highlighting and clear reset |
+| **Containerization** | Verified | Production `Dockerfile` and `.dockerignore` for containerized deployments |
 
 ---
 
-## User Quickstart (How to Run and Demo)
+## Quickstart Instructions
 
-### 1. Web Application (Already Live!)
-The application is currently running at **`http://localhost:8501`**.
-*(If you ever reboot or restart it in the future: `.\venv\Scripts\streamlit run app/main.py`)*
+### 1. Launch the Web Application
+
+The application can be run directly using Streamlit:
+
+```powershell
+# Windows
+.\venv\Scripts\streamlit run app/main.py
+
+# macOS / Linux
+source venv/bin/activate
+streamlit run app/main.py
+```
+
+Then open your browser at **`http://localhost:8501`**.
 
 ### 2. Run the Full Test Suite
+
+To run all 71 automated tests with code coverage analysis:
+
 ```powershell
-.\venv\Scripts\pytest --cov=src --cov-report=term-missing
+python -m pytest tests/ -v --cov=src --cov-report=term-missing
 ```
 
-### 3. Open the Demonstration Notebook
+### 3. Open the Interactive Demonstration Notebook
+
+To inspect the pipeline step-by-step:
+
 ```powershell
-.\venv\Scripts\jupyter notebook notebooks/pipeline_demonstration.ipynb
+jupyter notebook notebooks/pipeline_demonstration.ipynb
 ```
 
-### 4. Capstone Defense & Presentation
-- **Presentation Deck:** Open `presentation/presentation_slides.md` (compatible with Marp or markdown slide renderer).
-- **Speaker Notes:** Review `presentation/speaker_notes.md` for timed verbal talking points for each slide.
-- **Viva Preparation:** Review `docs/VIVA_QA.md` for 44 comprehensive questions and answers covering NLP, ML, Cybersecurity, and project architecture.
+### 4. Container Deployment (Docker)
 
-### 5. Optional: Push to Your Personal GitHub
-A clean initial commit is already created on branch `main`. To link to your GitHub account:
-```powershell
-git remote add origin https://github.com/<your-username>/mail-lens-ai.git
-git push -u origin main
+To build and run the Docker container locally:
+
+```bash
+docker build -t mail-lens-ai .
+docker run -d -p 8501:8501 mail-lens-ai
 ```
+
+---
+
+## Project Repository
+
+* **GitHub Repository:** [https://github.com/harisx404/mail-lens-ai](https://github.com/harisx404/mail-lens-ai)
+* **Author:** Muhammad Haris ([itsharis.tech@gmail.com](mailto:itsharis.tech@gmail.com))
+* **Affiliation:** Final Project · KPITB AI/ML Training Program

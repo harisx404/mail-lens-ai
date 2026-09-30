@@ -55,3 +55,13 @@ Mail-Lens AI is a practical NLP security project that classifies emails as legit
 - Experiment design: why E3 (TF-IDF only + LinearSVC) outperformed E5 (TF-IDF + security features) despite having fewer features
 - Calibration: difference between raw SVM decision margins and Platt-calibrated probabilities
 - Security hardening: XSS prevention in HTML rendering, exception narrowing, whitespace edge cases
+
+---
+
+## Author & Contact
+
+**Muhammad Haris**  
+- Final Project · KPITB AI/ML Training Program  
+- Email: [itsharis.tech@gmail.com](mailto:itsharis.tech@gmail.com)  
+- GitHub: [@harisx404](https://github.com/harisx404)  
+- LinkedIn: [@harisx404](https://linkedin.com/in/harisx404)
