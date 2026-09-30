@@ -74,12 +74,13 @@ st.markdown(
         background-color: var(--canvas) !important;
         font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
         color: var(--ink-body) !important;
+        font-size: 14px !important;
     }
 
     /* 1920x1080 Scaled Container */
     .main .block-container {
         padding-top: 1.5rem !important;
-        padding-bottom: 3.5rem !important;
+        padding-bottom: 2.5rem !important;
         max-width: 1680px !important;
     }
 
@@ -92,100 +93,100 @@ st.markdown(
     .app-header {
         background: #ffffff;
         border: 1.5px solid var(--border-subtle);
-        border-radius: 16px;
-        padding: 22px 34px;
-        margin-bottom: 20px;
+        border-radius: 14px;
+        padding: 16px 24px;
+        margin-bottom: 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 18px;
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        gap: 16px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
     .brand-section {
         display: flex;
         align-items: center;
-        gap: 18px;
+        gap: 14px;
     }
     .brand-logo {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
         background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 36px;
+        font-size: 18px;
         color: #ffffff;
-        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.32);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
     }
     .brand-title {
-        font-size: 32px;
+        font-size: 18px;
         font-weight: 800;
         color: var(--ink-title);
         margin: 0;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
     }
     .brand-title span {
         color: var(--brand-blue);
     }
     .brand-sub {
-        font-size: 15.5px;
+        font-size: 14px;
         color: var(--ink-muted);
         font-weight: 600;
-        margin: 5px 0 0 0;
+        margin: 3px 0 0 0;
     }
 
     .student-card {
         background: #ffffff;
         border: 1.5px solid var(--border-subtle);
-        border-radius: 14px;
-        padding: 12px 26px;
+        border-radius: 12px;
+        padding: 10px 20px;
         text-align: right;
     }
     .student-name {
-        font-size: 22px;
+        font-size: 18px;
         font-weight: 800;
         color: var(--ink-title);
         line-height: 1.2;
     }
     .student-meta {
-        font-size: 15px;
+        font-size: 12px;
         color: var(--brand-blue);
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
-        margin-top: 3px;
+        margin-top: 2px;
     }
 
     /* Section Titles */
     .section-title {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--ink-title);
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         border-bottom: 1.5px solid var(--border-subtle);
-        padding-bottom: 11px;
+        padding-bottom: 8px;
     }
 
-    /* Scenario Preset Buttons (1920x1080 Large) */
+    /* Scenario Preset Buttons */
     div[data-testid="stButton"] button {
         background-color: #ffffff !important;
         border: 1.5px solid #cbd5e1 !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         color: #0f172a !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 15.5px !important;
+        font-size: 14px !important;
         font-weight: 700 !important;
-        height: 56px !important;
-        min-height: 56px !important;
-        padding: 10px 18px !important;
-        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05) !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        padding: 8px 14px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: flex !important;
         align-items: center !important;
@@ -197,15 +198,15 @@ st.markdown(
         background-color: #eff6ff !important;
         border-color: #2563eb !important;
         color: #1d4ed8 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.22) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.2) !important;
     }
     div[data-testid="stButton"] button:active {
         transform: translateY(0px) !important;
         background-color: #dbeafe !important;
     }
     div[data-testid="stButton"] button p {
-        font-size: 15.5px !important;
+        font-size: 14px !important;
         font-weight: 700 !important;
         color: inherit !important;
         margin: 0 !important;
@@ -219,7 +220,7 @@ st.markdown(
     div[data-testid="stTextArea"] div[data-baseweb="textarea"] {
         background-color: #ffffff !important;
         border: 1.5px solid #cbd5e1 !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
         transition: border-color 0.2s, box-shadow 0.2s !important;
     }
@@ -236,35 +237,35 @@ st.markdown(
         box-shadow: none !important;
         color: #0f172a !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 16px !important;
+        font-size: 14px !important;
         font-weight: 500 !important;
         line-height: 1.55 !important;
-        padding: 14px 18px !important;
+        padding: 12px 14px !important;
     }
     div[data-testid="stTextInput"] label p,
     div[data-testid="stTextArea"] label p {
-        font-size: 14.5px !important;
+        font-size: 16px !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
+        letter-spacing: 0.04em !important;
         color: #334155 !important;
-        margin: 0 0 8px 0 !important;
+        margin: 0 0 6px 0 !important;
     }
 
     /* Primary Submit Button */
     div[data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
         border: none !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         color: #ffffff !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 18.5px !important;
+        font-size: 16px !important;
         font-weight: 800 !important;
-        height: 60px !important;
-        min-height: 60px !important;
-        padding: 14px 30px !important;
+        height: 52px !important;
+        min-height: 52px !important;
+        padding: 12px 24px !important;
         letter-spacing: 0.02em !important;
-        box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35) !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.32) !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: flex !important;
         align-items: center !important;
@@ -274,8 +275,8 @@ st.markdown(
     }
     div[data-testid="stFormSubmitButton"] button:hover {
         background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
-        box-shadow: 0 8px 26px rgba(37, 99, 235, 0.48) !important;
-        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.44) !important;
+        transform: translateY(-1px) !important;
     }
     div[data-testid="stFormSubmitButton"] button:active {
         transform: translateY(0px) !important;
@@ -283,7 +284,7 @@ st.markdown(
     }
     div[data-testid="stFormSubmitButton"] button p {
         color: #ffffff !important;
-        font-size: 18.5px !important;
+        font-size: 16px !important;
         font-weight: 800 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -291,9 +292,9 @@ st.markdown(
 
     /* Verdict Banner */
     .verdict-box {
-        border-radius: 14px;
-        padding: 24px 32px;
-        margin-bottom: 20px;
+        border-radius: 12px;
+        padding: 18px 24px;
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -305,10 +306,10 @@ st.markdown(
     .vb-mal   { background: #fef2f2; border-color: #fecaca; }
 
     .verdict-title {
-        font-size: 42px;
+        font-size: 18px;
         font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
     }
     .vt-phish { color: #d97706; }
     .vt-legit { color: #059669; }
@@ -316,10 +317,10 @@ st.markdown(
 
     .status-badge {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 800;
-        padding: 9px 22px;
-        border-radius: 9px;
+        padding: 7px 16px;
+        border-radius: 8px;
         letter-spacing: 0.05em;
         text-transform: uppercase;
     }
@@ -331,17 +332,17 @@ st.markdown(
     .kpi-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 18px;
-        margin-bottom: 20px;
+        gap: 16px;
+        margin-bottom: 16px;
     }
     .kpi-cell {
         background: #f8fafc;
         border: 1.5px solid var(--border-subtle);
-        border-radius: 14px;
-        padding: 20px 24px;
+        border-radius: 12px;
+        padding: 16px 20px;
     }
     .kpi-label {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -349,13 +350,13 @@ st.markdown(
     }
     .kpi-num {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 46px;
+        font-size: 18px;
         font-weight: 800;
-        line-height: 1.1;
-        margin: 8px 0;
+        line-height: 1.2;
+        margin: 6px 0;
     }
     .kpi-sub {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         color: var(--ink-muted);
     }
@@ -364,49 +365,49 @@ st.markdown(
     .reason-box {
         background: #ffffff;
         border: 1.5px solid var(--border-subtle);
-        border-radius: 14px;
-        padding: 18px 24px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
     }
     .reason-threat {
-        border-left: 6px solid #dc2626;
+        border-left: 5px solid #dc2626;
         background: #fffafa;
     }
     .reason-warning {
-        border-left: 6px solid #d97706;
+        border-left: 5px solid #d97706;
         background: #fffdfa;
     }
     .reason-safe {
-        border-left: 6px solid #059669;
+        border-left: 5px solid #059669;
         background: #fafffc;
     }
     .reason-header {
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-size: 17px;
-        font-weight: 800;
-        margin-bottom: 6px;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 4px;
     }
     .reason-desc {
-        font-size: 15px;
+        font-size: 14px;
         color: #334155;
-        line-height: 1.6;
-        margin-left: 36px;
+        line-height: 1.5;
+        margin-left: 28px;
     }
 
     /* Word Token Badges */
     .token-chip {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         font-family: 'JetBrains Mono', monospace;
         font-size: 14px;
         font-weight: 700;
-        padding: 7px 15px;
-        border-radius: 8px;
-        margin: 4px 8px 4px 0;
+        padding: 6px 12px;
+        border-radius: 6px;
+        margin: 3px 6px 3px 0;
     }
     .tc-threat { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     .tc-safe   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
@@ -415,33 +416,33 @@ st.markdown(
     .action-container {
         background: #eff6ff;
         border: 1.5px solid #bfdbfe;
-        border-left: 8px solid #2563eb;
-        border-radius: 16px;
-        padding: 26px 34px;
-        margin-top: 10px;
-        margin-bottom: 28px;
+        border-left: 6px solid #2563eb;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-top: 8px;
+        margin-bottom: 22px;
         display: flex;
         align-items: flex-start;
-        gap: 22px;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+        gap: 16px;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
     }
     .action-icon {
-        font-size: 44px;
-        line-height: 1.0;
+        font-size: 18px;
+        line-height: 1.2;
         margin-top: 2px;
     }
     .action-content-title {
-        font-size: 19px;
+        font-size: 16px;
         font-weight: 800;
         color: #1e3a8a;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         text-transform: uppercase;
         letter-spacing: 0.04em;
     }
     .action-content-body {
-        font-size: 16px;
+        font-size: 14px;
         color: #1e293b;
-        line-height: 1.65;
+        line-height: 1.55;
         font-weight: 500;
     }
 
@@ -449,37 +450,37 @@ st.markdown(
     .footer-card {
         background: #ffffff;
         border: 1.5px solid var(--border-subtle);
-        border-radius: 16px;
-        padding: 32px 42px;
-        margin-top: 32px;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        border-radius: 14px;
+        padding: 22px 28px;
+        margin-top: 26px;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
     }
     .footer-top-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 16px;
+        gap: 14px;
         border-bottom: 1.5px solid var(--border-subtle);
-        padding-bottom: 18px;
+        padding-bottom: 14px;
     }
     .footer-title {
-        font-size: 21px;
+        font-size: 16px;
         font-weight: 800;
         color: var(--ink-title);
         letter-spacing: -0.01em;
     }
     .footer-sub {
-        font-size: 15px;
+        font-size: 14px;
         color: var(--ink-muted);
         font-weight: 600;
-        margin-top: 4px;
+        margin-top: 3px;
     }
     .footer-author {
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 700;
         color: #1e293b;
         text-align: right;
@@ -490,24 +491,24 @@ st.markdown(
         font-weight: 800;
     }
     .footer-author-sub {
-        font-size: 14px;
+        font-size: 12px;
         color: #64748b;
         font-family: 'JetBrains Mono', monospace;
-        margin-top: 3px;
+        margin-top: 2px;
     }
     .footer-stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        gap: 14px;
     }
     .footer-stat-card {
         background: #f8fafc;
         border: 1.5px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px 20px;
+        border-radius: 10px;
+        padding: 14px 16px;
     }
     .footer-stat-label {
-        font-size: 12.5px;
+        font-size: 12px;
         font-weight: 800;
         text-transform: uppercase;
         color: #64748b;
@@ -515,13 +516,13 @@ st.markdown(
     }
     .footer-stat-val {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 19px;
+        font-size: 16px;
         font-weight: 800;
         color: #0f172a;
-        margin: 6px 0 4px 0;
+        margin: 4px 0 2px 0;
     }
     .footer-stat-sub {
-        font-size: 13px;
+        font-size: 12px;
         color: #475569;
         font-weight: 500;
     }
@@ -534,16 +535,16 @@ st.markdown(
         font-size: 14px;
         color: #64748b;
         border-top: 1px solid #f1f5f9;
-        padding-top: 14px;
+        padding-top: 12px;
     }
     .footer-badge-pill {
         background: #eff6ff;
         border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        padding: 6px 14px;
+        border-radius: 6px;
+        padding: 4px 12px;
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
-        font-size: 13.5px;
+        font-size: 12px;
         color: #1e40af;
     }
 </style>
@@ -564,130 +565,130 @@ engine = load_engine()
 # Plain-English Explanation Generator (At Least 4 Reasons)
 # ============================================
 def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_text: str) -> list:
-    """Generate at least 4 crystal-clear, plain-English bullet reasons explaining the AI's verdict."""
+    """Generate short, easy-to-understand plain-English reasons for the AI verdict."""
     reasons = []
     combined = (sender_text + " " + subj_text + " " + body_text).lower()
 
     if res.prediction != "LEGITIMATE":
-        # 1. Sender Domain & Lookalike Analysis
+        # 1. Sender Address & Lookalikes
         if sender_text and ("rnicrosoft" in sender_text.lower() or "paypa1" in sender_text.lower() or ".xyz" in sender_text.lower()):
             reasons.append({
                 "type": "threat",
                 "icon": "🎭",
-                "title": "1. Fake Sender Address Trying to Trick You (Lookalike Scam)",
-                "desc": f"The sender's address ('{sender_text}') replaces the letter 'm' with 'rn' to look like 'microsoft.com' at a quick glance. This is a classic visual trick used by scammers to pretend to be a company you trust."
+                "title": "1. Fake Sender Address",
+                "desc": f"The sender email ('{sender_text}') uses lookalike letters ('rn' for 'm') to secretly imitate a trusted company."
             })
         elif any("impersonation" in ind.lower() or "typosquat" in ind.lower() for ind in res.detected_indicators):
             reasons.append({
                 "type": "threat",
                 "icon": "🎭",
-                "title": "1. Brand Impersonation & Fake Corporate Name",
-                "desc": "The sender domain closely mimics an official protected company brand with subtle typos, designed to fool recipients into believing it is genuine."
+                "title": "1. Impersonated Brand Name",
+                "desc": "The sender domain uses subtle spelling tricks to mimic an official brand and deceive you."
             })
         else:
             reasons.append({
                 "type": "warning",
                 "icon": "⚠️",
-                "title": "1. Untrusted or Fake Sender Address",
-                "desc": f"The email came from an unverified or unfamiliar domain ('{sender_text if sender_text else 'Unknown/Spoofed'}') rather than authentic corporate servers, showing the sender is hiding their real identity."
+                "title": "1. Unverified Sender Domain",
+                "desc": f"The email came from an untrusted outside address ('{sender_text if sender_text else 'Unknown'}') rather than official servers."
             })
 
-        # 2. Psychological Urgency & Fear Pressure Tactics
+        # 2. Fake Urgency & Panic Tactics
         if any(w in combined for w in ["immediate", "within 24 hours", "within 2 hours", "quota exceeded", "blocked", "suspension", "final notice", "urgent", "freeze"]):
             reasons.append({
                 "type": "warning",
                 "icon": "⏱️",
-                "title": "2. Creates Fake Panic & Rushes You to Act",
-                "desc": "The email uses urgent pressure words (like 'immediate action required', 'account blocked in 24 hours', or 'permanent deactivation') to make you panic and click before thinking or asking your IT team."
+                "title": "2. Fake Panic Pressure",
+                "desc": "Uses panic words ('immediate action', 'blocked in 24 hours') to rush you into clicking before verifying."
             })
         else:
             reasons.append({
                 "type": "warning",
                 "icon": "🎣",
-                "title": "2. Pushy Emotional Manipulation Tactics",
-                "desc": "The message uses pushy, administrative language designed to rush you into doing something immediately without checking whether the request is real."
+                "title": "2. Pushy Language Tactics",
+                "desc": "Uses pushy administrative wording designed to make you act fast without consulting IT."
             })
 
-        # 3. Call-to-Action & Credential Theft Mechanism
+        # 3. Password / Login Stealing Traps
         if any(w in combined for w in ["verify your password", "restore-access", "login", "password", "credential", "account activity"]):
             reasons.append({
                 "type": "threat",
                 "icon": "🔒",
-                "title": "3. Tries to Steal Your Login Password (Credential Theft)",
-                "desc": "The email urges you to click a button or link to 'log in', 'verify your password', or 'restore access'. Clicking this opens a fake login screen built specifically to capture and steal your private password."
+                "title": "3. Password Theft Link",
+                "desc": "Directs you to a deceptive login page built specifically to steal your private password."
             })
         else:
             reasons.append({
                 "type": "warning",
                 "icon": "🔗",
-                "title": "3. Suspicious Links Leading to Outside Websites",
-                "desc": "The embedded links route you to unknown third-party hosting websites instead of the official, trusted business service infrastructure."
+                "title": "3. Suspicious External Link",
+                "desc": "Contains links that redirect traffic to unverified external websites outside your organization."
             })
 
-        # 4. Attachment / Payload Threat Analysis
+        # 4. Attachment / Program File Analysis
         if any(ext in combined for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"]):
             reasons.append({
                 "type": "threat",
                 "icon": "📎",
-                "title": "4. References a Dangerous Program File (.exe)",
-                "desc": "The email mentions a dangerous computer program file (.exe) disguised as a routine PDF or invoice. Opening this file could secretly install malware or ransomware on your computer."
+                "title": "4. Dangerous Program File (.exe)",
+                "desc": "References an executable program (.exe) that can secretly install malware or ransomware on your PC."
             })
         else:
             reasons.append({
                 "type": "threat",
                 "icon": "🛡️",
-                "title": "4. Multiple Red Flags Triggered Simultaneously",
-                "desc": "Multiple warning signs occurred together (unverified links, urgent deadlines, and unverified sender information), pushing this email into the elevated threat category."
+                "title": "4. Multiple Threat Signals",
+                "desc": "Unverified links, urgent deadlines, and origin mismatches combined to trigger high risk."
             })
 
-        # 5. AI NLP Feature Vector Attribution
+        # 5. AI Scam Pattern Match
         if res.top_threat_tokens:
-            top_words = ", ".join([f"'{t['token']}'" for t in res.top_threat_tokens[:4]])
+            top_words = ", ".join([f"'{t['token']}'" for t in res.top_threat_tokens[:3]])
             reasons.append({
                 "type": "threat",
                 "icon": "🧠",
-                "title": "5. AI Detected Multiple High-Risk Scam Words",
-                "desc": f"Our trained machine learning model scanned the full text and detected high-risk scam words ({top_words}) that commonly appear in attack emails, mathematically pulling it into the threat category."
+                "title": "5. AI Scam Pattern Match",
+                "desc": f"The AI model detected high-risk scam words ({top_words}) typical of phishing attacks."
             })
         else:
             reasons.append({
                 "type": "threat",
                 "icon": "🧠",
-                "title": "5. AI Statistical Pattern Matches Attack Database",
-                "desc": "The 10,020-feature machine learning classifier detected strong structural similarities to known malicious campaigns, marking this message as unsafe."
+                "title": "5. AI Threat Classifier Match",
+                "desc": "Machine learning pattern matching flagged strong statistical similarity to known attack campaigns."
             })
 
     else:
-        # Legitimate Email: 5 Guaranteed Plain-English Reasons
+        # Legitimate Email: 5 Short Plain-English Reasons
         reasons.append({
             "type": "safe",
             "icon": "✅",
-            "title": "1. Authentic Professional Workplace Language",
-            "desc": "The email uses standard, calm business words (like meeting schedules, project updates, and team deliverables) with no panic words, no threats, and no forced rush."
+            "title": "1. Normal Workplace Language",
+            "desc": "Uses routine, professional business vocabulary with zero panic, threats, or pressure."
         })
         reasons.append({
             "type": "safe",
             "icon": "🛡️",
-            "title": "2. Clean & Verified Sender Address",
-            "desc": f"The sender address ('{sender_text}') matches authentic corporate standards with zero misspelled company names, fake characters, or deceptive lookalike tricks."
+            "title": "2. Verified Sender Address",
+            "desc": f"The sender address ('{sender_text}') matches authentic business standards with no deceptive tricks."
         })
         reasons.append({
             "type": "safe",
             "icon": "🔗",
-            "title": "3. No Deceptive Links or Password Traps",
-            "desc": "There are no suspicious web links asking you to enter passwords, confirm bank details, or sign into unfamiliar external websites."
+            "title": "3. No Password Traps",
+            "desc": "Contains no fake login portals, credential harvesting forms, or hidden redirect links."
         })
         reasons.append({
             "type": "safe",
             "icon": "📎",
-            "title": "4. Safe Message with No Dangerous Files",
-            "desc": "The email contains clean text with no executable computer files (like .exe or .scr) or double-extension attachments that could harm your computer."
+            "title": "4. No Risky Attachments",
+            "desc": "Clean text message with no executable computer files (.exe) or dangerous software mentioned."
         })
         reasons.append({
             "type": "safe",
             "icon": "⚖️",
-            "title": "5. AI Model Confirmed Deep Safe Zone",
-            "desc": "Our calibrated machine learning model calculated that this message matches genuine business communication patterns, placing it securely in the green safe zone."
+            "title": "5. AI Verified Safe Score",
+            "desc": "The trained machine learning model calculated low risk, placing this email deep in the safe zone."
         })
 
     return reasons
@@ -779,7 +780,7 @@ st.markdown(
 # ============================================
 # 2. BEAUTIFUL QUICK TESTING BUTTONS
 # ============================================
-st.markdown('<div style="font-size: 14.5px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 9px; letter-spacing: 0.04em;">⚡ Quick Test Scenarios (Click to Load):</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size: 16px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 8px; letter-spacing: 0.04em;">⚡ Quick Test Scenarios (Click to Load):</div>', unsafe_allow_html=True)
 p_cols = st.columns(4)
 
 for i, name in enumerate(SCENARIOS.keys()):
@@ -799,7 +800,7 @@ st.markdown(
     """
 <div class="section-title">
     <span>1. Email & Link Input Console</span>
-    <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #2563eb;">Input Workstation</span>
+    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #2563eb;">Input Workstation</span>
 </div>
 """,
     unsafe_allow_html=True,
@@ -869,7 +870,7 @@ with col_out1:
         """
     <div class="section-title">
         <span>2. AI Classification & Threat Ranking</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #059669;">● Live Prediction</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #059669;">● Live Prediction</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -889,16 +890,16 @@ with col_out1:
         vt_cls = "vt-mal"
         v_tag = '<span class="status-badge sb-mal">● MALICIOUS ATTACK</span>'
 
-    # Big Verdict Banner (42px headline)
+    # Big Verdict Banner (18px headline)
     st.markdown(
         f"""
     <div class="verdict-box {vb_cls}">
         <div>
-            <div style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
+            <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
                 AI Model Verdict
             </div>
             <div class="verdict-title {vt_cls}">{res.prediction}</div>
-            <div style="font-size: 14px; color: #475569; margin-top: 5px;">
+            <div style="font-size: 12px; color: #475569; margin-top: 4px;">
                 Inference Latency: <strong>{latency_ms:.1f}ms</strong> &nbsp;|&nbsp; Calibrated Decision Margin
             </div>
         </div>
@@ -910,14 +911,14 @@ with col_out1:
         unsafe_allow_html=True,
     )
 
-    # 2 Big Primary KPI Cards (46px Numbers)
+    # 2 Big Primary KPI Cards (18px Numbers)
     risk_int = int(res.risk_score * 100)
     st.markdown(
         f"""
     <div class="kpi-row">
         <div class="kpi-cell">
             <div class="kpi-label">Composite Risk Score</div>
-            <div class="kpi-num" style="color: {res.risk_color};">{risk_int} <span style="font-size: 22px; font-weight: 600; color: #64748b;">/ 100</span></div>
+            <div class="kpi-num" style="color: {res.risk_color};">{risk_int} <span style="font-size: 14px; font-weight: 600; color: #64748b;">/ 100</span></div>
             <div class="kpi-sub">Threat Severity: <strong>{res.risk_level}</strong></div>
         </div>
         <div class="kpi-cell">
@@ -932,7 +933,7 @@ with col_out1:
 
     # Class Probability Distribution Bars
     st.markdown(
-        '<div style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 6px; font-family: \'JetBrains Mono\', monospace;">Posterior Class Probabilities:</div>',
+        '<div style="font-size: 14px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 6px; font-family: \'JetBrains Mono\', monospace;">Posterior Class Probabilities:</div>',
         unsafe_allow_html=True,
     )
     prob_chart = go.Figure(
@@ -960,7 +961,7 @@ with col_out1:
         height=125,
         margin=dict(l=0, r=20, t=4, b=4),
         xaxis=dict(range=[0, 100], showgrid=False, showticklabels=False),
-        yaxis=dict(showgrid=False, tickfont=dict(size=13.5, family="JetBrains Mono", color="#334155"), autorange="reversed"),
+        yaxis=dict(showgrid=False, tickfont=dict(size=14, family="JetBrains Mono", color="#334155"), autorange="reversed"),
         bargap=0.22,
     )
     st.plotly_chart(prob_chart, use_container_width=True, config={"displayModeBar": False})
@@ -968,14 +969,14 @@ with col_out1:
     # Top Triggering Words
     if res.top_threat_tokens:
         st.markdown(
-            '<div style="font-size: 13px; font-weight: 800; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin: 12px 0 6px 0;">TOP THREAT KEYWORDS DETECTED:</div>',
+            '<div style="font-size: 12px; font-weight: 800; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP THREAT KEYWORDS DETECTED:</div>',
             unsafe_allow_html=True,
         )
         chips_threat = "".join([f'<span class="token-chip tc-threat">{t["token"]} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
         st.markdown(chips_threat, unsafe_allow_html=True)
     elif res.top_safe_tokens:
         st.markdown(
-            '<div style="font-size: 13px; font-weight: 800; color: #059669; font-family: \'JetBrains Mono\', monospace; margin: 12px 0 6px 0;">TOP BENIGN KEYWORDS DETECTED:</div>',
+            '<div style="font-size: 12px; font-weight: 800; color: #059669; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP BENIGN KEYWORDS DETECTED:</div>',
             unsafe_allow_html=True,
         )
         chips_safe = "".join([f'<span class="token-chip tc-safe">{t["token"]} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
@@ -989,7 +990,7 @@ with col_out2:
         f"""
     <div class="section-title">
         <span>Why Was This Email Marked As {res.prediction}?</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #2563eb;">Plain-English Reasons ({'5 Detected' if res.prediction != 'LEGITIMATE' else '5 Verified'})</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #2563eb;">Plain-English Reasons ({'5 Detected' if res.prediction != 'LEGITIMATE' else '5 Verified'})</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -1003,7 +1004,7 @@ with col_out2:
             f"""
         <div class="reason-box {border_cls}">
             <div class="reason-header">
-                <span style="font-size: 24px;">{r['icon']}</span>
+                <span style="font-size: 18px;">{r['icon']}</span>
                 <span>{r['title']}</span>
             </div>
             <div class="reason-desc">{r['desc']}</div>
