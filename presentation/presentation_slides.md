@@ -63,7 +63,7 @@ style: |
 # 🛡️ PhishGuard AI
 ## NLP-Based Phishing & Malicious Email Detection and Risk Analysis System
 
-**Author:** Muhammad Haris  
+**Author:** Muhammad Haris (S.No: 70)  
 **Program:** KPITB AI / ML Training Program — Final Capstone Project  
 **Date:** September 2026  
 **Repository:** `phishguard-ai`  
@@ -186,6 +186,12 @@ Raw Email Input
 3. **Attachment Indicators:**
    - Mention of high-risk executables (`.exe`, `.scr`, `.vbs`, `.ps1`) and archives (`.zip`, `.iso`)
 
+4. **Brand Impersonation & Typosquatting:**
+   - `brand_similarity_score`, `is_typosquat` (Levenshtein distance vs 23 enterprise domains, catches `rnicrosoft.com`)
+
+5. **Adversarial Cloaking Detection:**
+   - `simulation_cloak_score` (identifies awareness training disclaimers used as social engineering cloaks)
+
 ---
 
 ## 🧩 Feature Fusion Architecture
@@ -195,13 +201,13 @@ Preprocessed Email Text ──► TfidfVectorizer (Max 10,000, Unigram + Bigram)
                                                                               │
                                                                        scipy.sparse.hstack
                                                                               │
-Raw Email Text ───────────► SecurityFeatureExtractor (17 Dense Indicators) ───┘
+Raw Email Text ───────────► SecurityFeatureExtractor (20 Dense Indicators) ───┘
                                                                               │
                                                                               ▼
-                                                       Combined Feature Matrix (10,017 dims)
+                                                       Combined Feature Matrix (10,020 dims)
 ```
 
-* **Dimensionality:** 10,000 statistical n-gram dimensions + 17 dense domain indicators.
+* **Dimensionality:** 10,000 statistical n-gram dimensions + 20 dense domain indicators.
 * **Storage Efficiency:** SciPy CSR sparse matrix format guarantees low RAM footprint and high training speed.
 
 ---
@@ -317,5 +323,6 @@ Built with **Streamlit** following modern cyber-defense dashboard aesthetics:
 **Questions & Discussion**
 
 * **Codebase:** `D:\KPITB AI\Final project\phishguard-ai`
-* **Test Suite:** 31 Unit Tests Passing (100%)
-* **Contact:** Muhammad Haris
+* **Test Suite:** 58 Unit & Integration Tests Passing (75.6% coverage)
+* **Author:** Muhammad Haris (S.No: 70)
+* **Program:** KPITB AI/ML Training Program — Final Project

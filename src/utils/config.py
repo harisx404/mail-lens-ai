@@ -105,6 +105,22 @@ IMPERSONATION_KEYWORDS = [
     "it department", "admin", "administrator",
 ]
 
+SIMULATION_KEYWORDS = [
+    "simulation", "training exercise", "security exercise",
+    "phishing test", "this is a test", "awareness training",
+    "identify the warning signs", "cybersecurity training",
+    "training simulation", "simulated",
+]
+
+KNOWN_BRANDS = [
+    "microsoft.com", "apple.com", "google.com", "amazon.com",
+    "paypal.com", "netflix.com", "facebook.com", "linkedin.com",
+    "dropbox.com", "adobe.com", "outlook.com", "office365.com",
+    "wellsfargo.com", "bankofamerica.com", "chase.com",
+    "instagram.com", "twitter.com", "whatsapp.com", "yahoo.com",
+    "dhl.com", "fedex.com", "ups.com", "usps.com",
+]
+
 # ============================================
 # URL Feature Configuration
 # ============================================
@@ -121,9 +137,9 @@ URL_SHORTENERS = [
 ]
 
 EXECUTABLE_EXTENSIONS = [
-    ".exe", ".bat", ".cmd", ".com", ".msi",
+    ".exe", ".bat", ".cmd", ".msi",
     ".scr", ".pif", ".vbs", ".js", ".wsf",
-    ".ps1", ".jar", ".py", ".sh",
+    ".ps1", ".jar",
 ]
 
 SUSPICIOUS_EXTENSIONS = [

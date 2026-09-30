@@ -25,7 +25,9 @@ from src.utils.config import (
     CREDENTIAL_KEYWORDS,
     EXECUTABLE_EXTENSIONS,
     IMPERSONATION_KEYWORDS,
+    KNOWN_BRANDS,
     REWARD_KEYWORDS,
+    SIMULATION_KEYWORDS,
     SUSPICIOUS_EXTENSIONS,
     SUSPICIOUS_TLDS,
     THREAT_KEYWORDS,
@@ -84,6 +86,13 @@ class SecurityFeatures:
     has_archive_mention: int = 0
     attachment_keyword_count: int = 0
 
+    # Brand impersonation / typosquatting
+    brand_similarity_score: float = 0.0
+    is_typosquat: int = 0
+
+    # Simulation cloaking
+    simulation_cloak_score: float = 0.0
+
     # Combined indicator count
     total_indicators: int = 0
 
@@ -109,6 +118,9 @@ class SecurityFeatures:
             "has_executable_mention": self.has_executable_mention,
             "has_archive_mention": self.has_archive_mention,
             "attachment_keyword_count": self.attachment_keyword_count,
+            "brand_similarity_score": self.brand_similarity_score,
+            "is_typosquat": self.is_typosquat,
+            "simulation_cloak_score": self.simulation_cloak_score,
             "total_indicators": self.total_indicators,
         }
 
@@ -130,6 +142,7 @@ class SecurityFeatureExtractor:
         self._threat_patterns = self._compile_keywords(THREAT_KEYWORDS)
         self._reward_patterns = self._compile_keywords(REWARD_KEYWORDS)
         self._impersonation_patterns = self._compile_keywords(IMPERSONATION_KEYWORDS)
+        self._simulation_patterns = self._compile_keywords(SIMULATION_KEYWORDS)
 
     @staticmethod
     def _compile_keywords(keywords: List[str]) -> List[re.Pattern]:
@@ -312,8 +325,72 @@ class SecurityFeatureExtractor:
         if features.has_archive_mention:
             indicators.append("Archive/document file type mentioned")
 
+        # --- Typosquatting / Brand impersonation ---
+        brand_feats = self._extract_brand_impersonation(text)
+        features.brand_similarity_score = brand_feats["brand_similarity_score"]
+        features.is_typosquat = brand_feats["is_typosquat"]
+
+        if features.is_typosquat:
+            indicators.append(
+                f"Possible brand impersonation detected (similarity: {features.brand_similarity_score:.0%})"
+            )
+
+        # --- Simulation cloaking ---
+        sim_count = self._count_matches(text, self._simulation_patterns)
+        features.simulation_cloak_score = self._compute_score(sim_count, max_expected=3)
+        if sim_count > 0 and (features.credential_count > 0 or features.threat_count > 0):
+            indicators.append("Simulation/training language with threat indicators (possible cloaking)")
+
         # --- Total indicators ---
         features.total_indicators = len(indicators)
         features.detected_indicators = indicators
 
         return features
+
+    @staticmethod
+    def _levenshtein_distance(s1: str, s2: str) -> int:
+        """Compute Levenshtein edit distance between two strings."""
+        if len(s1) < len(s2):
+            return SecurityFeatureExtractor._levenshtein_distance(s2, s1)
+        if len(s2) == 0:
+            return len(s1)
+        prev_row = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            curr_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = prev_row[j + 1] + 1
+                deletions = curr_row[j] + 1
+                substitutions = prev_row[j] + (c1 != c2)
+                curr_row.append(min(insertions, deletions, substitutions))
+            prev_row = curr_row
+        return prev_row[-1]
+
+    def _extract_brand_impersonation(self, text: str) -> dict:
+        """Detect typosquatting and brand impersonation in domains."""
+        result = {"brand_similarity_score": 0.0, "is_typosquat": 0}
+
+        # Extract all domain-like patterns from text
+        domain_pattern = re.compile(
+            r'[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}',
+            re.IGNORECASE,
+        )
+        domains_in_text = domain_pattern.findall(text.lower())
+
+        max_similarity = 0.0
+        for domain in domains_in_text:
+            for brand in KNOWN_BRANDS:
+                if domain == brand:
+                    continue  # Exact match = legitimate
+                dist = self._levenshtein_distance(domain, brand)
+                max_len = max(len(domain), len(brand))
+                if max_len == 0:
+                    continue
+                similarity = 1.0 - (dist / max_len)
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                # Typosquat: very close but not exact (edit distance 1-2)
+                if 0 < dist <= 2 and len(domain) >= 5:
+                    result["is_typosquat"] = 1
+
+        result["brand_similarity_score"] = round(max_similarity, 4)
+        return result

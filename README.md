@@ -137,8 +137,8 @@ All experiments evaluated on a stratified validation set of **1,796 samples** wi
 | **E1** | Logistic Regression | TF-IDF (10k n-grams) | 97.33% | 0.9717 | 0.9733 | Baseline |
 | **E2** | Multinomial Naive Bayes | TF-IDF (10k n-grams) | 96.05% | 0.8922 | 0.9611 | Probabilistic baseline |
 | **E3** | **Linear SVM (Calibrated)** | **TF-IDF (10k n-grams)** | **97.94%** | **0.9760** | **0.9794** | 🏆 **Best Model** |
-| **E4** | Logistic Regression | TF-IDF + 17 Security Features | 97.38% | 0.9721 | 0.9739 | Feature fusion |
-| **E5** | Linear SVM (Calibrated) | TF-IDF + 17 Security Features | 97.77% | 0.9748 | 0.9777 | Feature fusion |
+| **E4** | Logistic Regression | TF-IDF + 20 Security Features | 97.44% | 0.9725 | 0.9745 | Feature fusion |
+| **E5** | Linear SVM (Calibrated) | TF-IDF + 20 Security Features | 97.88% | 0.9657 | 0.9788 | Feature fusion |
 
 ### 🏆 Final Evaluation on Held-Out Test Set (3,592 Samples)
 
@@ -167,15 +167,22 @@ Actual Malicious  :              0                    2                   33
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & Quality Assurance
+
+PhishGuard AI includes a rigorous test suite of **58 passing tests** achieving **75.6% overall code coverage** (with core modules exceeding 90%):
 
 ```bash
-# Run all tests
+# Run all unit and integration tests
 python -m pytest tests/ -v
 
-# Run with coverage
-python -m pytest tests/ --cov=src --cov-report=html
+# Run with test coverage report
+python -m pytest tests/ --cov=src --cov-report=term-missing
 ```
+
+Test breakdown:
+- `tests/test_core.py` (36 tests): Preprocessing, tokenization, sanitization, basic features, and pipeline tests.
+- `tests/test_extended.py` (12 tests): Feature engineering, factory patterns, and evaluation metrics.
+- `tests/test_integration.py` (10 tests): End-to-end inference, regression tests for `.com` false positives, typosquatting/homoglyph detection (`rnicrosoft.com`), simulation cloaking, and state consistency.
 
 ---
 
@@ -190,28 +197,30 @@ phishguard-ai/
 ├── requirements.txt
 ├── pyproject.toml
 │
-├── docs/                    # Documentation
+├── docs/                    # Architecture, design decisions, and reports
 ├── data/
-│   ├── raw/                 # Raw datasets (not committed)
-│   └── processed/           # Processed splits (not committed)
+│   ├── raw/                 # Raw datasets (Dataset A & Dataset B)
+│   └── processed/           # Processed splits (train, val, test)
 │
 ├── src/
 │   ├── data/                # Data loading & pipeline
-│   ├── preprocessing/       # NLP text preprocessing
-│   ├── features/            # Feature engineering (TF-IDF + security)
-│   ├── models/              # Model training
-│   ├── evaluation/          # Model evaluation
-│   ├── inference/           # Production inference pipeline
-│   └── utils/               # Configuration & utilities
+│   ├── preprocessing/       # NLP text preprocessing (cleaner, lemmatizer)
+│   ├── features/            # Feature engineering (TF-IDF + 20 security features)
+│   ├── models/              # Model training (LR, NB, SVM)
+│   ├── evaluation/          # Model evaluation & metrics
+│   ├── inference/           # Production inference pipeline & risk scoring
+│   └── utils/               # Configuration & constants
 │
 ├── app/                     # Streamlit web application
-│   └── main.py              # Main application entry point
+│   └── main.py              # SOC Dashboard UI (v2.0)
 │
-├── models/saved/            # Trained model artifacts (not committed)
-├── tests/                   # Test suite
+├── models/saved/            # Serialized model artifacts & results JSON
+├── tests/                   # 58 unit, integration, and regression tests
 ├── scripts/                 # Training & utility scripts
 ├── notebooks/               # Jupyter notebooks for EDA
 └── presentation/            # Capstone presentation
+    ├── PhishGuard_AI_Presentation.html  # 10-page print-to-PDF presentation
+    └── presentation_slides.md           # Marp presentation slides
 ```
 
 ---
@@ -219,7 +228,7 @@ phishguard-ai/
 ## ⚠️ Limitations
 
 - This is a **research/educational capstone prototype**, not a production security product
-- The MALICIOUS class has limited training data (~200 samples) — detection may be less reliable
+- The MALICIOUS class has limited training data (~177 samples) — detection may be less reliable
 - Training data is English-only
 - No real-time email interception or mailbox integration
 - No dynamic analysis (no URL visiting, no file execution)
@@ -232,12 +241,12 @@ phishguard-ai/
 ## 🔮 Future Improvements
 
 - Larger, more balanced dataset for MALICIOUS class
-- Transformer-based models (DistilBERT) for improved accuracy
-- Multi-language support
-- Email header analysis (SPF, DKIM, DMARC)
-- Real-time API integration
-- Active learning from user feedback
-- SHAP-based model explainability
+- Transformer-based models (DistilBERT / RoBERTa) for improved contextual nuances
+- Multi-language support (Urdu, Arabic, Spanish)
+- RFC 822 Email header analysis (SPF, DKIM, DMARC alignment)
+- Real-time SIEM API integration (Splunk, Microsoft Sentinel)
+- Active learning from security analyst feedback
+- Sandboxed URL detonation via VirusTotal API
 
 ---
 
@@ -245,9 +254,9 @@ phishguard-ai/
 
 - No email content is sent to external APIs
 - All analysis is performed locally
-- No URLs are visited during analysis
-- No files are executed
-- Sanitized input handling
+- No URLs are visited during analysis (pure static analysis)
+- No files or scripts are executed
+- Sanitized input handling against script injection
 - No sensitive data logging
 - Configuration via environment variables
 
@@ -256,15 +265,17 @@ phishguard-ai/
 ## 📄 Credits & References
 
 - **Datasets:** HuggingFace (zefang-liu), Zenodo (Engineering Ingegneria Informatica Spa)
-- **Libraries:** scikit-learn, NLTK, Streamlit, pandas, numpy
+- **Libraries:** scikit-learn, NLTK, Streamlit, Plotly, pandas, numpy
 - **Methodology:** TF-IDF vectorization, supervised classification, cybersecurity feature engineering
 
 ---
 
 ## 👤 Author
 
-**Muhammad Haris**
-AI/ML Training Program — KPITB
+**Muhammad Haris**  
+**S.No:** 70  
+**Program:** KPITB AI/ML Training Program  
+**Project:** Final Capstone Project  
 
 ---
 

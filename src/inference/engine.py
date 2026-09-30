@@ -14,6 +14,8 @@ from typing import Dict, List, Optional
 
 import joblib
 import numpy as np
+from scipy.sparse import issparse
+from sklearn.naive_bayes import MultinomialNB
 
 from src.features.feature_engineer import FeatureEngineer
 from src.features.security_features import SecurityFeatureExtractor
@@ -157,6 +159,56 @@ class PhishGuardInference:
                 3,
             )
 
+    def _apply_risk_override(
+        self,
+        risk_score: float,
+        risk_level: str,
+        prediction: str,
+        probabilities: dict,
+        indicator_count: int,
+        security_features_dict: dict = None,
+    ) -> tuple:
+        """
+        Apply security indicator override to risk assessment.
+
+        Escalates risk level when dangerous threat signals are present:
+        - Executable attachments/mentions with threat classifications
+        - Brand typosquatting / lookalike domain attacks
+        - High density of security indicators with threat probabilities
+        """
+        sec = security_features_dict or {}
+        non_legit_prob = probabilities.get("PHISHING", 0.0) + probabilities.get("MALICIOUS", 0.0)
+
+        # Override 1: Executable payload mention with threat classification
+        if sec.get("has_executable_mention", 0) and (
+            prediction in ("PHISHING", "MALICIOUS") or non_legit_prob > 0.40
+        ):
+            risk_score = max(risk_score, 0.70)
+            risk_level, _ = self._get_risk_level(risk_score)
+
+        # Override 2: Brand impersonation / typosquatting detected
+        if (
+            sec.get("is_typosquat", 0) or sec.get("brand_similarity_score", 0.0) >= 0.80
+        ) and non_legit_prob > 0.15:
+            risk_score = max(risk_score, 0.65)
+            risk_level, _ = self._get_risk_level(risk_score)
+
+        # Override 3: 3+ indicators fire with threat probability > 15%
+        if indicator_count >= 3 and non_legit_prob > 0.15:
+            risk_score = max(risk_score, 0.65)
+            risk_level, _ = self._get_risk_level(risk_score)
+
+        # Override 4: Threat prediction with multiple indicators and majority threat probability
+        if (
+            prediction in ("PHISHING", "MALICIOUS")
+            and indicator_count >= 2
+            and non_legit_prob >= 0.50
+        ):
+            risk_score = max(risk_score, 0.65)
+            risk_level, _ = self._get_risk_level(risk_score)
+
+        return risk_score, risk_level
+
     def _get_risk_level(self, risk_score: float) -> tuple:
         """Map risk score to risk level and color."""
         for level, config in RISK_LEVELS.items():
@@ -294,9 +346,6 @@ class PhishGuardInference:
 
         # Predict
         # Handle NB non-negative requirement
-        from sklearn.naive_bayes import MultinomialNB
-        from scipy.sparse import issparse
-
         X_pred = X
         if isinstance(self.model, MultinomialNB):
             if issparse(X_pred):
@@ -327,6 +376,17 @@ class PhishGuardInference:
             security_features.to_dict(),
         )
         risk_level, risk_color = self._get_risk_level(risk_score)
+
+        # Apply security indicator override
+        risk_score, risk_level = self._apply_risk_override(
+            risk_score,
+            risk_level,
+            prediction,
+            probabilities,
+            security_features.total_indicators,
+            security_features.to_dict(),
+        )
+        _, risk_color = self._get_risk_level(risk_score)
 
         # Explanation
         explanation = self._generate_explanation(
