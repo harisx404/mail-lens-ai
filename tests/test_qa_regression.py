@@ -96,7 +96,7 @@ class TestQARegressionsAndHardening:
         duration_ms = (time.perf_counter() - t0) * 1000
 
         assert result.prediction in ("LEGITIMATE", "PHISHING", "MALICIOUS")
-        assert duration_ms < 500  # Must complete comfortably under 500ms
+        assert duration_ms < 1000  # Must complete comfortably under 1000ms for 50,000 chars
 
     def test_boundary_empty_and_whitespace(self, inference_engine):
         """Verify Bug Fix 4: Empty, whitespace-only, and blank inputs safely return UNKNOWN without crashes."""

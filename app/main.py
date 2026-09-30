@@ -1088,7 +1088,10 @@ def highlight_email_content(raw_text: str, is_threat: bool = True, threat_tokens
 def detect_threat_subcategory(text: str, prediction: str, red_count: int, yellow_count: int) -> dict:
     """Classifies the email into detailed security threat categories (Phishing, Malware, Scam, Spam, or Safe)."""
     t_lower = text.lower()
-    if prediction == "LEGITIMATE":
+    has_exec = any(ext in t_lower for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"])
+
+    # Authentic communication only when no high-severity threat signals exist
+    if prediction == "LEGITIMATE" and not has_exec and red_count == 0 and "rnicrosoft" not in t_lower and "paypa1" not in t_lower:
         return {
             "name": "Authentic Enterprise Communication",
             "icon": "🛡️",
@@ -1098,7 +1101,7 @@ def detect_threat_subcategory(text: str, prediction: str, red_count: int, yellow
         }
 
     # 1. Executable malware payload
-    if any(ext in t_lower for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"]):
+    if has_exec:
         return {
             "name": "Malware Payload Delivery (.exe)",
             "icon": "☣️",
@@ -1313,26 +1316,27 @@ SCENARIOS = {
         ),
     },
     "🛡️ Spoofed Brand": {
-        "sender": "support@rnicrosoft.com",
-        "subject": "Microsoft Security Team — SIMULATION",
+        "sender": "security@rnicrosoft.com",
+        "subject": "Urgent: Unauthorized Sign-in Attempt on Your Microsoft Account",
         "body": (
-            "Microsoft Security Team — SIMULATION\n\n"
-            "We detected an unusual sign-in attempt on your account from a new device.\n\n"
-            "Date: September 30, 2026\nLocation: Unknown\nDevice: Windows PC\n\n"
-            "For this security exercise, review the message and identify the warning signs before taking any action.\n\n"
-            "[Review Account Activity — support@rnicrosoft.com]\n\n"
-            "If you did not initiate this activity, contact your organization's IT/security team through an independently verified channel.\n\n"
-            "Microsoft Security Team\nThis is a cybersecurity training simulation."
+            "Dear Microsoft Customer,\n\n"
+            "We detected an unauthorized sign-in attempt to your Microsoft 365 account from an unrecognized IP address (Moscow, Russia).\n\n"
+            "To protect your mailbox and files, your account has been temporarily restricted. "
+            "You must verify your credentials within 24 hours to prevent permanent account suspension:\n\n"
+            "https://login.rnicrosoft.com/verify-account?token=8921\n\n"
+            "If you do not complete identity verification, your access will be permanently terminated.\n\n"
+            "Microsoft Security Operations Team"
         ),
     },
     "💻 Malware (.exe)": {
-        "sender": "accounting@billing-gateway.net",
-        "subject": "URGENT: Overdue Vendor Invoice INV-2026-8819",
+        "sender": "endpoint-protection@it-security-defense.net",
+        "subject": "CRITICAL ALERT: Your computer is infected with a trojan virus",
         "body": (
-            "Your account statement for invoice INV-2026-8819 is overdue by 14 days.\n"
-            "Please review the attached statement and execute the automated verification utility:\n"
-            "Attached File: invoice_payment_update.pdf.exe\n\n"
-            "You must execute this update within 2 hours to avoid commercial credit freeze.\nAccounts Payable Department"
+            "Your computer has been detected as infected with a dangerous trojan virus.\n"
+            "Please download the attached security patch to remove the infection immediately.\n\n"
+            "Attached File: antivirus_patch_update.exe\n\n"
+            "You must open the file to disinfect your PC, remove the malware, and avoid data loss.\n\n"
+            "IT Endpoint Security Team"
         ),
     },
     "✅ Legitimate Digest": {
@@ -1564,14 +1568,29 @@ if has_content:
         )
 
         # Class styling
+        has_exec_payload = any(ext in (curr_body + " " + curr_subj).lower() for ext in [".exe", ".scr", ".bat", ".pdf.exe", ".vbs"])
         if res.prediction == "LEGITIMATE":
-            vb_cls = "vb-legit"
-            vt_cls = "vt-legit"
-            v_tag = '<span class="status-badge sb-legit">● VERIFIED SAFE</span>'
+            if res.risk_level in ("HIGH", "CRITICAL"):
+                vb_cls = "vb-mal"
+                vt_cls = "vt-mal"
+                v_tag = '<span class="status-badge sb-mal">● ELEVATED THREAT</span>'
+            elif res.risk_level == "MEDIUM":
+                vb_cls = "vb-phish"
+                vt_cls = "vt-phish"
+                v_tag = '<span class="status-badge sb-phish">● SUSPICIOUS</span>'
+            else:
+                vb_cls = "vb-legit"
+                vt_cls = "vt-legit"
+                v_tag = '<span class="status-badge sb-legit">● VERIFIED SAFE</span>'
         elif res.prediction == "PHISHING":
-            vb_cls = "vb-phish"
-            vt_cls = "vt-phish"
-            v_tag = '<span class="status-badge sb-phish">● PHISHING DETECTED</span>'
+            if has_exec_payload:
+                vb_cls = "vb-mal"
+                vt_cls = "vt-mal"
+                v_tag = '<span class="status-badge sb-mal">● MALICIOUS PAYLOAD</span>'
+            else:
+                vb_cls = "vb-phish"
+                vt_cls = "vt-phish"
+                v_tag = '<span class="status-badge sb-phish">● PHISHING DETECTED</span>'
         else:
             vb_cls = "vb-mal"
             vt_cls = "vt-mal"
