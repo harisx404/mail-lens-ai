@@ -155,6 +155,8 @@ st.markdown(
         border-radius: 12px;
         padding: 10px 20px;
         text-align: right;
+        box-sizing: border-box;
+        max-width: 100%;
     }
     .student-name {
         font-size: 18px;
@@ -168,6 +170,8 @@ st.markdown(
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
         margin-top: 2px;
+        word-break: break-word;
+        white-space: normal;
     }
 
     /* Section Titles */
@@ -252,6 +256,8 @@ st.markdown(
         font-weight: 500 !important;
         line-height: 1.55 !important;
         padding: 12px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     div[data-testid="stTextInput"] label p,
     div[data-testid="stTextArea"] label p {
@@ -304,40 +310,88 @@ st.markdown(
     /* Verdict Banner */
     .verdict-box {
         border-radius: 12px;
-        padding: 18px 24px;
+        padding: 16px 20px;
         margin-bottom: 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
         border-width: 1.5px;
         border-style: solid;
+        box-sizing: border-box;
+        width: 100%;
+        transition: all 0.2s ease;
     }
     .vb-phish { background: #fffbeb; border-color: #fde68a; }
     .vb-legit { background: #ecfdf5; border-color: #a7f3d0; }
     .vb-mal   { background: #fef2f2; border-color: #fecaca; }
 
+    .verdict-info {
+        flex: 1 1 240px;
+        min-width: 0;
+    }
+    .verdict-eyebrow {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #64748b;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+    }
     .verdict-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 800;
         letter-spacing: -0.01em;
-        line-height: 1.2;
+        line-height: 1.25;
+        margin: 3px 0;
+        word-break: break-word;
     }
     .vt-phish { color: #d97706; }
     .vt-legit { color: #059669; }
     .vt-mal   { color: #dc2626; }
 
+    .verdict-meta {
+        font-size: 12px;
+        color: #475569;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        line-height: 1.4;
+    }
+    .verdict-meta-sep {
+        color: #94a3b8;
+    }
+
+    .verdict-badge-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
     .status-badge {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
-        padding: 7px 16px;
+        padding: 7px 14px;
         border-radius: 8px;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        box-sizing: border-box;
+        max-width: 100%;
+        line-height: 1.3;
     }
     .sb-phish { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; }
     .sb-legit { background: #d1fae5; color: #065f46; border: 1.5px solid #6ee7b7; }
     .sb-mal   { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; }
+
 
     /* 2 Big Primary KPI Cards */
     .kpi-row {
@@ -414,11 +468,14 @@ st.markdown(
         align-items: center;
         gap: 5px;
         font-family: 'JetBrains Mono', monospace;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
-        padding: 6px 12px;
+        padding: 5px 10px;
         border-radius: 6px;
         margin: 3px 6px 3px 0;
+        box-sizing: border-box;
+        max-width: 100%;
+        word-break: break-word;
     }
     .tc-threat { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     .tc-safe   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
@@ -436,6 +493,8 @@ st.markdown(
         align-items: flex-start;
         gap: 16px;
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+        box-sizing: border-box;
+        width: 100%;
     }
     .action-icon {
         font-size: 18px;
@@ -611,6 +670,9 @@ st.markdown(
         padding: 14px 18px;
         margin-top: 14px;
         box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+        box-sizing: border-box;
+        width: 100%;
+        overflow-x: hidden;
     }
     .inspector-header {
         display: flex;
@@ -648,10 +710,10 @@ st.markdown(
     }
 
     /* ========================================================
-       RESPONSIVE DESIGN & MOBILE/TABLET BREAKPOINTS
+       RESPONSIVE DESIGN & MULTI-DEVICE BREAKPOINTS
        ======================================================== */
 
-    /* Medium Laptops & Desktops */
+    /* Medium Laptops & Desktops (max 1200px) */
     @media (max-width: 1200px) {
         .main .block-container,
         [data-testid="stMainBlockContainer"],
@@ -663,9 +725,13 @@ st.markdown(
         .footer-stats-grid {
             grid-template-columns: repeat(2, 1fr) !important;
         }
+        .verdict-box {
+            padding: 16px 18px !important;
+            gap: 12px !important;
+        }
     }
 
-    /* Tablets & Foldables (Stack 2-column layout into clean single-column) */
+    /* Tablets & Foldables (max 900px) */
     @media (max-width: 900px) {
         div[data-testid="stHorizontalBlock"] {
             flex-wrap: wrap !important;
@@ -674,6 +740,11 @@ st.markdown(
         div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
             min-width: 100% !important;
             flex: 1 1 100% !important;
+        }
+        /* Scenario Preset Buttons on tablet form a balanced 2x2 grid */
+        div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-of-type(4)) > div[data-testid="column"] {
+            min-width: calc(50% - 8px) !important;
+            flex: 1 1 calc(50% - 8px) !important;
         }
         .app-header {
             flex-direction: column !important;
@@ -685,6 +756,10 @@ st.markdown(
             width: 100% !important;
             text-align: left !important;
             padding: 10px 14px !important;
+        }
+        .verdict-box {
+            padding: 16px !important;
+            gap: 12px !important;
         }
         .footer-top-row {
             flex-direction: column !important;
@@ -699,7 +774,26 @@ st.markdown(
         }
     }
 
-    /* Mobile Phones & Handheld Devices */
+    /* Small Tablets & Large Phones (max 768px) */
+    @media (max-width: 768px) {
+        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+        .verdict-box {
+            padding: 14px 16px !important;
+            gap: 10px !important;
+        }
+        .status-badge {
+            font-size: 12.5px !important;
+            padding: 6px 12px !important;
+        }
+        .kpi-row {
+            gap: 12px !important;
+        }
+    }
+
+    /* Mobile Phones & Handheld Devices (max 600px) */
     @media (max-width: 600px) {
         .main .block-container,
         [data-testid="stMainBlockContainer"],
@@ -711,6 +805,9 @@ st.markdown(
         .app-header {
             padding: 12px 14px !important;
             margin-bottom: 12px !important;
+        }
+        .brand-section {
+            gap: 10px !important;
         }
         .brand-logo {
             width: 40px !important;
@@ -729,6 +826,9 @@ st.markdown(
         }
         .student-meta {
             font-size: 11px !important;
+            word-break: break-word !important;
+            white-space: normal !important;
+            line-height: 1.4 !important;
         }
         .section-title {
             font-size: 14px !important;
@@ -736,6 +836,58 @@ st.markdown(
             align-items: flex-start !important;
             gap: 4px !important;
         }
+
+        /* Responsive Verdict Banner on Mobile: Stack vertically into unified card */
+        .verdict-box {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 14px !important;
+            gap: 12px !important;
+        }
+        .verdict-info {
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            text-align: left !important;
+        }
+        .verdict-title {
+            font-size: 18px !important;
+        }
+        .verdict-meta {
+            font-size: 11.5px !important;
+            gap: 4px !important;
+        }
+        .verdict-badge-wrap {
+            width: 100% !important;
+            justify-content: stretch !important;
+            margin-top: 2px !important;
+        }
+        .status-badge {
+            width: 100% !important;
+            text-align: center !important;
+            justify-content: center !important;
+            padding: 8px 12px !important;
+            font-size: 12.5px !important;
+        }
+
+        /* 2 Primary KPI Cards Collapse to 1 Column on Mobile */
+        .kpi-row {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+        .kpi-cell {
+            padding: 12px 14px !important;
+        }
+        .kpi-num {
+            font-size: 18px !important;
+        }
+
+        /* Preset Scenario Buttons stack full-width on mobile */
+        div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-of-type(4)) > div[data-testid="column"] {
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        /* Preset Scenario Buttons */
         div[data-testid="stButton"] button {
             height: 44px !important;
             min-height: 44px !important;
@@ -747,6 +899,7 @@ st.markdown(
             white-space: normal !important;
             text-align: center !important;
         }
+
         .action-container {
             flex-direction: column !important;
             padding: 14px 16px !important;
@@ -779,6 +932,39 @@ st.markdown(
         .inspector-body {
             padding: 10px 12px !important;
             font-size: 13px !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+    }
+
+    /* Small Mobile Phones (max 420px) */
+    @media (max-width: 420px) {
+        .main .block-container,
+        [data-testid="stMainBlockContainer"],
+        .block-container {
+            padding-left: 0.35rem !important;
+            padding-right: 0.35rem !important;
+        }
+        .brand-title {
+            font-size: 15px !important;
+        }
+        .student-name {
+            font-size: 14px !important;
+        }
+        .student-meta {
+            font-size: 10.5px !important;
+        }
+        .verdict-title {
+            font-size: 16px !important;
+        }
+        .status-badge {
+            font-size: 11.5px !important;
+            padding: 7px 8px !important;
+            letter-spacing: 0.02em !important;
+        }
+        .token-chip {
+            font-size: 12px !important;
+            padding: 4px 8px !important;
         }
     }
 </style>
@@ -1391,20 +1577,20 @@ if has_content:
             vt_cls = "vt-mal"
             v_tag = '<span class="status-badge sb-mal">● MALICIOUS ATTACK</span>'
 
-        # Big Verdict Banner (18px headline)
+        # Big Verdict Banner (Responsive headline & badge)
         st.markdown(
             f"""
         <div class="verdict-box {vb_cls}">
-            <div>
-                <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
-                    AI Model Verdict
-                </div>
+            <div class="verdict-info">
+                <div class="verdict-eyebrow">AI Model Verdict</div>
                 <div class="verdict-title {vt_cls}">{res.prediction}</div>
-                <div style="font-size: 12px; color: #475569; margin-top: 4px;">
-                    Inference Latency: <strong>{latency_ms:.1f}ms</strong> &nbsp;|&nbsp; Calibrated Decision Margin
+                <div class="verdict-meta">
+                    <span>Inference Latency: <strong>{latency_ms:.1f}ms</strong></span>
+                    <span class="verdict-meta-sep">•</span>
+                    <span>Calibrated Decision Margin</span>
                 </div>
             </div>
-            <div style="text-align: right;">
+            <div class="verdict-badge-wrap">
                 {v_tag}
             </div>
         </div>
@@ -1581,17 +1767,19 @@ else:
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #64748b;">● Standby</span>
         </div>
         <div class="verdict-box" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
-            <div>
-                <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
-                    AI Model Status
-                </div>
+            <div class="verdict-info">
+                <div class="verdict-eyebrow">AI Model Status</div>
                 <div class="verdict-title" style="color: #475569;">STANDBY</div>
-                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                    Calibrated Linear SVM · 10,000 N-Gram Features · Ready for Evaluation
+                <div class="verdict-meta">
+                    <span>Calibrated Linear SVM</span>
+                    <span class="verdict-meta-sep">•</span>
+                    <span>10,000 Features</span>
+                    <span class="verdict-meta-sep">•</span>
+                    <span>Ready for Evaluation</span>
                 </div>
             </div>
-            <div style="text-align: right;">
-                <span class="status-badge" style="background: #e2e8f0; color: #475569;">● AWAITING INPUT</span>
+            <div class="verdict-badge-wrap">
+                <span class="status-badge" style="background: #e2e8f0; color: #475569; border: 1.5px solid #cbd5e1;">● AWAITING INPUT</span>
             </div>
         </div>
         <div class="kpi-row">
