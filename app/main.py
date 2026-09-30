@@ -549,6 +549,20 @@ st.markdown(
         color: #1e40af;
     }
 
+    /* Form Clear Button Styling */
+    div[data-testid="stForm"] div[data-testid="column"]:nth-of-type(2) button {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        font-weight: 700 !important;
+        transition: all 0.2s ease !important;
+    }
+    div[data-testid="stForm"] div[data-testid="column"]:nth-of-type(2) button:hover {
+        background-color: #fee2e2 !important;
+        color: #dc2626 !important;
+        border-color: #fca5a5 !important;
+    }
+
     /* Keyword & Threat Highlighting (Red, Yellow, Green) */
     .hl-red {
         background-color: #fee2e2 !important;
@@ -1004,13 +1018,18 @@ SCENARIOS = {
     },
 }
 
-DEFAULT_PRESET = "🛡️ Spoofed Brand"
 if "form_sender_input" not in st.session_state:
-    st.session_state["form_sender_input"] = SCENARIOS[DEFAULT_PRESET]["sender"]
+    st.session_state["form_sender_input"] = ""
 if "form_subject_input" not in st.session_state:
-    st.session_state["form_subject_input"] = SCENARIOS[DEFAULT_PRESET]["subject"]
+    st.session_state["form_subject_input"] = ""
 if "form_body_input" not in st.session_state:
-    st.session_state["form_body_input"] = SCENARIOS[DEFAULT_PRESET]["body"]
+    st.session_state["form_body_input"] = ""
+
+def clear_all_inputs():
+    """Wipes all input workstation fields clean."""
+    st.session_state["form_sender_input"] = ""
+    st.session_state["form_subject_input"] = ""
+    st.session_state["form_body_input"] = ""
 
 # ============================================
 # 1. TOP HEADER: PROJECT NAME & STUDENT INFO
@@ -1098,46 +1117,62 @@ with st.form("analysis_form", clear_on_submit=False):
             unsafe_allow_html=True,
         )
 
-    submitted = st.form_submit_button(
-        "⚡ Analyze Threat & Score Risk",
-        use_container_width=True,
-    )
+    btn_c1, btn_c2 = st.columns([3, 1])
+    with btn_c1:
+        submitted = st.form_submit_button(
+            "⚡ Analyze Threat & Score Risk",
+            use_container_width=True,
+            type="primary",
+        )
+    with btn_c2:
+        cleared = st.form_submit_button(
+            "🗑️ Clear All Inputs",
+            use_container_width=True,
+            on_click=clear_all_inputs,
+        )
 
 st.write("")
 
-# Run inference
-curr_body = body_val if body_val else st.session_state.get("form_body_input", "")
-curr_subj = subject_val if subject_val else st.session_state.get("form_subject_input", "")
-curr_sender = sender_val if sender_val else st.session_state.get("form_sender_input", "")
+if cleared:
+    curr_body = ""
+    curr_subj = ""
+    curr_sender = ""
+else:
+    curr_body = body_val if body_val else st.session_state.get("form_body_input", "")
+    curr_subj = subject_val if subject_val else st.session_state.get("form_subject_input", "")
+    curr_sender = sender_val if sender_val else st.session_state.get("form_sender_input", "")
 
-start_t = datetime.datetime.now()
-res = engine.analyze(text=curr_body, subject=curr_subj, sender=curr_sender)
-latency_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
+has_content = bool(curr_body.strip() or curr_subj.strip() or curr_sender.strip())
 
-# Compute Visual Threat Keyword Highlights
-is_threat = res.prediction != "LEGITIMATE"
-highlighted_body, r_body, y_body, tags_body = highlight_email_content(
-    curr_body, is_threat=is_threat, threat_tokens=res.top_threat_tokens
-)
-highlighted_subj, r_subj, y_subj, tags_subj = highlight_email_content(
-    curr_subj, is_threat=is_threat
-)
-highlighted_sender, r_send, y_send, tags_send = highlight_email_content(
-    curr_sender, is_threat=is_threat
-)
+if has_content:
+    start_t = datetime.datetime.now()
+    res = engine.analyze(text=curr_body, subject=curr_subj, sender=curr_sender)
+    latency_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
 
-total_red = r_body + r_subj + r_send
-total_yellow = y_body + y_subj + y_send
-threat_subcat = detect_threat_subcategory(
-    (curr_sender + " " + curr_subj + " " + curr_body),
-    res.prediction,
-    total_red,
-    total_yellow,
-)
+    # Compute Visual Threat Keyword Highlights
+    is_threat = res.prediction != "LEGITIMATE"
+    highlighted_body, r_body, y_body, tags_body = highlight_email_content(
+        curr_body, is_threat=is_threat, threat_tokens=res.top_threat_tokens
+    )
+    highlighted_subj, r_subj, y_subj, tags_subj = highlight_email_content(
+        curr_subj, is_threat=is_threat
+    )
+    highlighted_sender, r_send, y_send, tags_send = highlight_email_content(
+        curr_sender, is_threat=is_threat
+    )
 
-# Render Visual Keyword Threat Highlighter (Email Inspector Card)
-st.markdown(
-    f"""
+    total_red = r_body + r_subj + r_send
+    total_yellow = y_body + y_subj + y_send
+    threat_subcat = detect_threat_subcategory(
+        (curr_sender + " " + curr_subj + " " + curr_body),
+        res.prediction,
+        total_red,
+        total_yellow,
+    )
+
+    # Render Visual Keyword Threat Highlighter (Email Inspector Card)
+    st.markdown(
+        f"""
 <div class="email-inspector-card">
     <div class="inspector-header">
         <div class="inspector-title">
@@ -1172,185 +1207,327 @@ st.markdown(
     </div>
 </div>
 """,
-    unsafe_allow_html=True,
-)
-
-st.write("")
-
-# ============================================
-# 4. TWO COLUMNS: CLASSIFICATION & REASONS
-# ============================================
-col_out1, col_out2 = st.columns([1, 1], gap="large")
-
-# --------------------------------------------
-# COLUMN 1: AI Classification & Threat Ranking
-# --------------------------------------------
-with col_out1:
-    st.markdown(
-        """
-    <div class="section-title">
-        <span>2. AI Classification & Threat Ranking</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #059669;">● Live Prediction</span>
-    </div>
-    """,
         unsafe_allow_html=True,
     )
 
-    # Class styling
-    if res.prediction == "LEGITIMATE":
-        vb_cls = "vb-legit"
-        vt_cls = "vt-legit"
-        v_tag = '<span class="status-badge sb-legit">● VERIFIED SAFE</span>'
-    elif res.prediction == "PHISHING":
-        vb_cls = "vb-phish"
-        vt_cls = "vt-phish"
-        v_tag = '<span class="status-badge sb-phish">● PHISHING DETECTED</span>'
-    else:
-        vb_cls = "vb-mal"
-        vt_cls = "vt-mal"
-        v_tag = '<span class="status-badge sb-mal">● MALICIOUS ATTACK</span>'
+    st.write("")
 
-    # Big Verdict Banner (18px headline)
-    st.markdown(
-        f"""
-    <div class="verdict-box {vb_cls}">
-        <div>
-            <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
-                AI Model Verdict
-            </div>
-            <div class="verdict-title {vt_cls}">{res.prediction}</div>
-            <div style="font-size: 12px; color: #475569; margin-top: 4px;">
-                Inference Latency: <strong>{latency_ms:.1f}ms</strong> &nbsp;|&nbsp; Calibrated Decision Margin
-            </div>
-        </div>
-        <div style="text-align: right;">
-            {v_tag}
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+    # ============================================
+    # 4. TWO COLUMNS: CLASSIFICATION & REASONS
+    # ============================================
+    col_out1, col_out2 = st.columns([1, 1], gap="large")
 
-    # 2 Big Primary KPI Cards (18px Numbers)
-    risk_int = int(res.risk_score * 100)
-    st.markdown(
-        f"""
-    <div class="kpi-row">
-        <div class="kpi-cell">
-            <div class="kpi-label">Composite Risk Score</div>
-            <div class="kpi-num" style="color: {res.risk_color};">{risk_int} <span style="font-size: 14px; font-weight: 600; color: #64748b;">/ 100</span></div>
-            <div class="kpi-sub">Threat Severity: <strong>{res.risk_level}</strong></div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Model Confidence</div>
-            <div class="kpi-num" style="color: #0f172a;">{res.confidence:.1%}</div>
-            <div class="kpi-sub">Platt-Calibrated SVM Probability</div>
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    # Class Probability Distribution Bars
-    st.markdown(
-        '<div style="font-size: 14px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 6px; font-family: \'JetBrains Mono\', monospace;">Posterior Class Probabilities:</div>',
-        unsafe_allow_html=True,
-    )
-    prob_chart = go.Figure(
-        go.Bar(
-            x=[
-                res.probabilities.get("LEGITIMATE", 0) * 100,
-                res.probabilities.get("PHISHING", 0) * 100,
-                res.probabilities.get("MALICIOUS", 0) * 100,
-            ],
-            y=["LEGITIMATE", "PHISHING", "MALICIOUS"],
-            orientation="h",
-            marker=dict(color=["#059669", "#d97706", "#dc2626"]),
-            text=[
-                f"{res.probabilities.get('LEGITIMATE', 0):.1%}",
-                f"{res.probabilities.get('PHISHING', 0):.1%}",
-                f"{res.probabilities.get('MALICIOUS', 0):.1%}",
-            ],
-            textposition="inside",
-            textfont=dict(size=14, family="JetBrains Mono", color="white"),
-        )
-    )
-    prob_chart.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=125,
-        margin=dict(l=0, r=20, t=4, b=4),
-        xaxis=dict(range=[0, 100], showgrid=False, showticklabels=False),
-        yaxis=dict(showgrid=False, tickfont=dict(size=14, family="JetBrains Mono", color="#334155"), autorange="reversed"),
-        bargap=0.22,
-    )
-    st.plotly_chart(prob_chart, use_container_width=True, config={"displayModeBar": False})
-
-    # Top Triggering Words
-    if res.top_threat_tokens:
+    # --------------------------------------------
+    # COLUMN 1: AI Classification & Threat Ranking
+    # --------------------------------------------
+    with col_out1:
         st.markdown(
-            '<div style="font-size: 12px; font-weight: 800; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP THREAT KEYWORDS DETECTED:</div>',
-            unsafe_allow_html=True,
-        )
-        chips_threat = "".join([f'<span class="token-chip tc-threat">{t["token"]} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
-        st.markdown(chips_threat, unsafe_allow_html=True)
-    elif res.top_safe_tokens:
-        st.markdown(
-            '<div style="font-size: 12px; font-weight: 800; color: #059669; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP BENIGN KEYWORDS DETECTED:</div>',
-            unsafe_allow_html=True,
-        )
-        chips_safe = "".join([f'<span class="token-chip tc-safe">{t["token"]} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
-        st.markdown(chips_safe, unsafe_allow_html=True)
-
-# --------------------------------------------
-# COLUMN 2: Why Was This Email Flagged? (At Least 4 Reasons)
-# --------------------------------------------
-with col_out2:
-    st.markdown(
-        f"""
-    <div class="section-title">
-        <span>Why Was This Email Marked As {res.prediction}?</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #2563eb;">Plain-English Reasons ({'5 Detected' if res.prediction != 'LEGITIMATE' else '5 Verified'})</span>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    reasons = generate_plain_english_reasons(res, curr_body, curr_subj, curr_sender)
-
-    for r in reasons:
-        border_cls = f"reason-{r['type']}"
-        st.markdown(
-            f"""
-        <div class="reason-box {border_cls}">
-            <div class="reason-header">
-                <span style="font-size: 18px;">{r['icon']}</span>
-                <span>{r['title']}</span>
-            </div>
-            <div class="reason-desc">{r['desc']}</div>
+            """
+        <div class="section-title">
+            <span>2. AI Classification & Threat Ranking</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #059669;">● Live Prediction</span>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
-# ============================================
-# 5. SINGLE COLUMN: RECOMMENDED SECURITY ACTION
-# ============================================
-st.write("")
-action_icon = "🛡️" if res.prediction == "LEGITIMATE" else ("🚨" if res.prediction == "MALICIOUS" else "⚠️")
+        # Class styling
+        if res.prediction == "LEGITIMATE":
+            vb_cls = "vb-legit"
+            vt_cls = "vt-legit"
+            v_tag = '<span class="status-badge sb-legit">● VERIFIED SAFE</span>'
+        elif res.prediction == "PHISHING":
+            vb_cls = "vb-phish"
+            vt_cls = "vt-phish"
+            v_tag = '<span class="status-badge sb-phish">● PHISHING DETECTED</span>'
+        else:
+            vb_cls = "vb-mal"
+            vt_cls = "vt-mal"
+            v_tag = '<span class="status-badge sb-mal">● MALICIOUS ATTACK</span>'
 
-st.markdown(
-    f"""
-<div class="action-container">
-    <div class="action-icon">{action_icon}</div>
-    <div>
-        <div class="action-content-title">Recommended Security Action</div>
-        <div class="action-content-body">{res.recommendation}</div>
+        # Big Verdict Banner (18px headline)
+        st.markdown(
+            f"""
+        <div class="verdict-box {vb_cls}">
+            <div>
+                <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
+                    AI Model Verdict
+                </div>
+                <div class="verdict-title {vt_cls}">{res.prediction}</div>
+                <div style="font-size: 12px; color: #475569; margin-top: 4px;">
+                    Inference Latency: <strong>{latency_ms:.1f}ms</strong> &nbsp;|&nbsp; Calibrated Decision Margin
+                </div>
+            </div>
+            <div style="text-align: right;">
+                {v_tag}
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        # 2 Big Primary KPI Cards (18px Numbers)
+        risk_int = int(res.risk_score * 100)
+        st.markdown(
+            f"""
+        <div class="kpi-row">
+            <div class="kpi-cell">
+                <div class="kpi-label">Composite Risk Score</div>
+                <div class="kpi-num" style="color: {res.risk_color};">{risk_int} <span style="font-size: 14px; font-weight: 600; color: #64748b;">/ 100</span></div>
+                <div class="kpi-sub">Threat Severity: <strong>{res.risk_level}</strong></div>
+            </div>
+            <div class="kpi-cell">
+                <div class="kpi-label">Model Confidence</div>
+                <div class="kpi-num" style="color: #0f172a;">{res.confidence:.1%}</div>
+                <div class="kpi-sub">Platt-Calibrated SVM Probability</div>
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        # Class Probability Distribution Bars
+        st.markdown(
+            '<div style="font-size: 14px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 6px; font-family: \'JetBrains Mono\', monospace;">Posterior Class Probabilities:</div>',
+            unsafe_allow_html=True,
+        )
+        prob_chart = go.Figure(
+            go.Bar(
+                x=[
+                    res.probabilities.get("LEGITIMATE", 0) * 100,
+                    res.probabilities.get("PHISHING", 0) * 100,
+                    res.probabilities.get("MALICIOUS", 0) * 100,
+                ],
+                y=["LEGITIMATE", "PHISHING", "MALICIOUS"],
+                orientation="h",
+                marker=dict(color=["#059669", "#d97706", "#dc2626"]),
+                text=[
+                    f"{res.probabilities.get('LEGITIMATE', 0):.1%}",
+                    f"{res.probabilities.get('PHISHING', 0):.1%}",
+                    f"{res.probabilities.get('MALICIOUS', 0):.1%}",
+                ],
+                textposition="inside",
+                textfont=dict(size=14, family="JetBrains Mono", color="white"),
+            )
+        )
+        prob_chart.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=125,
+            margin=dict(l=0, r=20, t=4, b=4),
+            xaxis=dict(range=[0, 100], showgrid=False, showticklabels=False),
+            yaxis=dict(showgrid=False, tickfont=dict(size=14, family="JetBrains Mono", color="#334155"), autorange="reversed"),
+            bargap=0.22,
+        )
+        st.plotly_chart(prob_chart, use_container_width=True, config={"displayModeBar": False})
+
+        # Top Triggering Words
+        if res.top_threat_tokens:
+            st.markdown(
+                '<div style="font-size: 12px; font-weight: 800; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP THREAT KEYWORDS DETECTED:</div>',
+                unsafe_allow_html=True,
+            )
+            chips_threat = "".join([f'<span class="token-chip tc-threat">{t["token"]} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
+            st.markdown(chips_threat, unsafe_allow_html=True)
+        elif res.top_safe_tokens:
+            st.markdown(
+                '<div style="font-size: 12px; font-weight: 800; color: #059669; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP BENIGN KEYWORDS DETECTED:</div>',
+                unsafe_allow_html=True,
+            )
+            chips_safe = "".join([f'<span class="token-chip tc-safe">{t["token"]} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
+            st.markdown(chips_safe, unsafe_allow_html=True)
+
+    # --------------------------------------------
+    # COLUMN 2: Why Was This Email Flagged? (At Least 4 Reasons)
+    # --------------------------------------------
+    with col_out2:
+        st.markdown(
+            f"""
+        <div class="section-title">
+            <span>Why Was This Email Marked As {res.prediction}?</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #2563eb;">Plain-English Reasons ({'5 Detected' if res.prediction != 'LEGITIMATE' else '5 Verified'})</span>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        reasons = generate_plain_english_reasons(res, curr_body, curr_subj, curr_sender)
+
+        for r in reasons:
+            border_cls = f"reason-{r['type']}"
+            st.markdown(
+                f"""
+            <div class="reason-box {border_cls}">
+                <div class="reason-header">
+                    <span style="font-size: 18px;">{r['icon']}</span>
+                    <span>{r['title']}</span>
+                </div>
+                <div class="reason-desc">{r['desc']}</div>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+    # ============================================
+    # 5. SINGLE COLUMN: RECOMMENDED SECURITY ACTION
+    # ============================================
+    st.write("")
+    action_icon = "🛡️" if res.prediction == "LEGITIMATE" else ("🚨" if res.prediction == "MALICIOUS" else "⚠️")
+
+    st.markdown(
+        f"""
+    <div class="action-container">
+        <div class="action-icon">{action_icon}</div>
+        <div>
+            <div class="action-content-title">Recommended Security Action</div>
+            <div class="action-content-body">{res.recommendation}</div>
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+else:
+    # Standby State Inspector Card
+    st.markdown(
+        """
+<div class="email-inspector-card">
+    <div class="inspector-header">
+        <div class="inspector-title">
+            🔍 Visual Keyword Threat Highlighter (Email Inspector)
+        </div>
+        <div class="inspector-legend">
+            <span class="hl-red">🔴 Red: Critical Threat</span>
+            <span class="hl-yellow">🟡 Yellow: Urgency / Scam</span>
+            <span class="hl-green">🟢 Green: Authentic Workplace</span>
+        </div>
+    </div>
+    <div class="inspector-body" style="text-align: center; padding: 24px 16px; color: #64748b; background: #f8fafc;">
+        <div style="font-size: 26px; margin-bottom: 6px;">📥</div>
+        <div style="font-size: 16px; font-weight: 700; color: #1e293b;">Input Workstation Ready for Evaluation</div>
+        <div style="font-size: 14px; color: #64748b; margin-top: 4px; max-width: 650px; margin-left: auto; margin-right: auto;">
+            Enter an email sender, subject, or message body in the console above, or click any of the <strong>4 Quick Test Scenarios</strong> above to automatically load real threat samples.
+        </div>
+    </div>
+    <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+        <div style="font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #64748b;">
+            System Status: <strong style="color: #059669;">● Ready / Standby Mode</strong>
+        </div>
+        <div style="font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #2563eb;">
+            NLP Security Engine: <strong>Initialized & Loaded</strong>
+        </div>
     </div>
 </div>
 """,
-    unsafe_allow_html=True,
-)
+        unsafe_allow_html=True,
+    )
+
+    st.write("")
+
+    # Standby Two Columns
+    col_out1, col_out2 = st.columns([1, 1], gap="large")
+
+    with col_out1:
+        st.markdown(
+            """
+        <div class="section-title">
+            <span>2. AI Classification & Threat Ranking</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #64748b;">● Standby</span>
+        </div>
+        <div class="verdict-box" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
+            <div>
+                <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
+                    AI Model Status
+                </div>
+                <div class="verdict-title" style="color: #475569;">STANDBY</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                    Calibrated Linear SVM · 10,020 Features · Ready for Evaluation
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="status-badge" style="background: #e2e8f0; color: #475569;">● AWAITING INPUT</span>
+            </div>
+        </div>
+        <div class="kpi-row">
+            <div class="kpi-cell">
+                <div class="kpi-label">Composite Risk Score</div>
+                <div class="kpi-num" style="color: #64748b;">-- <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">/ 100</span></div>
+                <div class="kpi-sub">Threat Severity: <strong>Awaiting Input</strong></div>
+            </div>
+            <div class="kpi-cell">
+                <div class="kpi-label">Model Confidence</div>
+                <div class="kpi-num" style="color: #64748b;">--%</div>
+                <div class="kpi-sub">Platt-Calibrated SVM Probability</div>
+            </div>
+        </div>
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; color: #64748b; margin-top: 10px;">
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Multi-Class Probability Distribution</div>
+            <div style="font-size: 13px; color: #64748b;">Awaiting email text to project input across Legitimate, Phishing, and Malicious decision boundaries.</div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    with col_out2:
+        st.markdown(
+            """
+        <div class="section-title">
+            <span>Security Inspection Criteria</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #2563eb;">5 Detection Factors</span>
+        </div>
+        <div class="reason-box reason-safe">
+            <div class="reason-header">
+                <span style="font-size: 18px;">🎭</span>
+                <span>1. Sender Address & Lookalikes</span>
+            </div>
+            <div class="reason-desc">Evaluates sender domain for homoglyph substitution and typosquatting (e.g. rnicrosoft.com).</div>
+        </div>
+        <div class="reason-box reason-warning">
+            <div class="reason-header">
+                <span style="font-size: 18px;">⏱️</span>
+                <span>2. Coercion & Panic Pressure</span>
+            </div>
+            <div class="reason-desc">Detects artificial panic deadlines ('within 24 hours') designed to bypass critical thinking.</div>
+        </div>
+        <div class="reason-box reason-threat">
+            <div class="reason-header">
+                <span style="font-size: 18px;">🔒</span>
+                <span>3. Password Harvesting Traps</span>
+            </div>
+            <div class="reason-desc">Identifies fake credential collection forms and deceptive login redirection portals.</div>
+        </div>
+        <div class="reason-box reason-threat">
+            <div class="reason-header">
+                <span style="font-size: 18px;">📎</span>
+                <span>4. Malware & Scam Triggers</span>
+            </div>
+            <div class="reason-desc">Scans for executable payload extensions (.exe) and advance-fee financial scam bait.</div>
+        </div>
+        <div class="reason-box reason-safe">
+            <div class="reason-header">
+                <span style="font-size: 18px;">🧠</span>
+                <span>5. AI Statistical Pattern Match</span>
+            </div>
+            <div class="reason-desc">Projects n-grams across calibrated SVM hyperplanes to calculate threat probabilities.</div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    # Standby Recommended Security Action
+    st.write("")
+    st.markdown(
+        """
+    <div class="action-container" style="border-left-color: #3b82f6;">
+        <div class="action-icon">💡</div>
+        <div>
+            <div class="action-content-title">Recommended Security Action</div>
+            <div class="action-content-body">Please enter an email in the console above or select a preset scenario. PhishGuard AI will classify the threat, highlight malicious keywords, and provide actionable security guidance.</div>
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
 
 # ============================================
 # 6. EXECUTIVE PRESENTATION FOOTER
