@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Data Pipeline
+Mail-Lens AI — Data Pipeline
 
 Handles:
 1. Loading raw datasets (A + B)

@@ -1,16 +1,16 @@
 """
-PhishGuard AI — Inference Pipeline
+Mail-Lens AI — Inference Pipeline
 
-Single clean pipeline for production inference:
-  Input → Parse → Preprocess → Features → Model → Prediction → Risk → Explanation
+Production inference pipeline:
+  Input → Preprocess → Features → Classify → Risk Score → Explain
 
-This module is used by both the web application and command-line inference.
+Used by both the web application and any CLI tooling.
 """
 
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import joblib
 import numpy as np
@@ -71,14 +71,12 @@ class AnalysisResult:
         }
 
 
-class PhishGuardInference:
-
+class MailLensInference:
     """
-    Production inference pipeline for PhishGuard AI.
+    Production inference pipeline for Mail-Lens AI.
 
     Usage:
-        engine = PhishGuardInference()
-        engine.load_model("models/saved")
+        engine = MailLensInference()
         result = engine.analyze("Dear customer, verify your account...")
     """
 
@@ -338,6 +336,12 @@ class PhishGuardInference:
             indices = vec.indices
             data = vec.data
 
+            feature_dims = (
+                len(self.feature_engineer.get_feature_names())
+                if self.feature_engineer and self.feature_engineer.get_feature_names()
+                else len(vectorizer.get_feature_names_out())
+            )
+
             pipeline_trace = {
                 "raw_char_count": len(full_text),
                 "raw_word_count": len(full_text.split()),
@@ -345,7 +349,7 @@ class PhishGuardInference:
                 "token_count": len(raw_tokens),
                 "vocab_match_count": int(len(indices)),
                 "total_vocab_size": len(vectorizer.vocabulary_),
-                "total_feature_dimensions": 10020,
+                "total_feature_dimensions": feature_dims,
             }
 
             # Extract base linear model coefficients
@@ -417,8 +421,8 @@ class PhishGuardInference:
                 "Model not loaded. Call load_model() first."
             )
 
-        # Combine subject and body for analysis
-        full_text = f"{subject} {text}".strip() if subject else text
+        # Combine subject and body for analysis, stripping whitespace
+        full_text = f"{subject or ''} {text or ''}".strip()
 
         if not full_text:
             return AnalysisResult(
@@ -507,6 +511,4 @@ class PhishGuardInference:
             email_snippet=full_text[:100] + "..." if len(full_text) > 100 else full_text,
         )
 
-    # Alias for analyze
-    predict = analyze
 

@@ -1,20 +1,12 @@
 """
-PhishGuard AI — Executive Single-Page AI/ML Capstone Dashboard
+Mail-Lens AI — Email Security Analysis Dashboard
 
-Optimized for 1920x1080 Full HD Presentation Displays
+Streamlit web application providing email threat classification,
+risk assessment, and explainability using an NLP/ML pipeline.
+
 Developer: Muhammad Haris (S.No: 70)
-Program: Final Project — KPITB AI/ML Training Program
-Model: Calibrated Linear SVM + TF-IDF (10,020 Features) — 98.64% Test Accuracy
-
-Layout Architecture:
-  1. Top Header: Project Name & Student Info (Muhammad Haris, S.No: 70, KPITB)
-  2. Beautiful Quick Testing Scenario Buttons (4 options)
-  3. Single Column: 1. Email & Link Input Console
-  4. Two Columns:
-       - Column 1: 2. AI Classification & Threat Ranking (Verdict, Score, Confidence, Chart)
-       - Column 2: Plain-English Reasons (At least 4 clear bullet explanations)
-  5. Single Column: 3. Recommended Security Action
-  6. Enlarged Executive Presentation Footer
+Program: KPITB AI/ML Training Program — Capstone Project
+Model: Calibrated Linear SVM + TF-IDF (10,000 N-Grams) — 98.64% Test Accuracy
 """
 
 import sys
@@ -34,15 +26,15 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.inference.engine import PhishGuardInference
+from src.inference.engine import MailLensInference
 from src.utils.config import MAX_EMAIL_LENGTH, MODELS_DIR
 
 # ============================================
 # Page Configuration
 # ============================================
 st.set_page_config(
-    page_title="PhishGuard AI — Executive Capstone Dashboard",
-    page_icon="🛡️",
+    page_title="Mail-Lens AI — Email Security Analysis",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -644,9 +636,9 @@ st.markdown(
 # ============================================
 # Engine Loading
 # ============================================
-@st.cache_resource(show_spinner="Loading PhishGuard AI Model...")
+@st.cache_resource(show_spinner="Loading Mail-Lens AI Model...")
 def load_engine():
-    return PhishGuardInference(MODELS_DIR)
+    return MailLensInference(MODELS_DIR)
 
 engine = load_engine()
 
@@ -825,6 +817,7 @@ def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_t
     """Generate short, easy-to-understand plain-English reasons for the AI verdict."""
     reasons = []
     combined = (sender_text + " " + subj_text + " " + body_text).lower()
+    safe_sender = html.escape(sender_text) if sender_text else "Unknown"
 
     if res.prediction != "LEGITIMATE":
         # 1. Sender Address & Lookalikes
@@ -833,7 +826,7 @@ def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_t
                 "type": "threat",
                 "icon": "🎭",
                 "title": "1. Fake Sender Address",
-                "desc": f"The sender email ('{sender_text}') uses lookalike letters ('rn' for 'm') to secretly imitate a trusted company."
+                "desc": f"The sender email ('{safe_sender}') uses lookalike letters ('rn' for 'm') to secretly imitate a trusted company."
             })
         elif any("impersonation" in ind.lower() or "typosquat" in ind.lower() for ind in res.detected_indicators):
             reasons.append({
@@ -847,7 +840,7 @@ def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_t
                 "type": "warning",
                 "icon": "⚠️",
                 "title": "1. Unverified Sender Domain",
-                "desc": f"The email came from an untrusted outside address ('{sender_text if sender_text else 'Unknown'}') rather than official servers."
+                "desc": f"The email came from an untrusted outside address ('{safe_sender}') rather than official servers."
             })
 
         # 2. Fake Urgency & Panic Tactics
@@ -941,7 +934,7 @@ def generate_plain_english_reasons(res, body_text: str, subj_text: str, sender_t
             "type": "safe",
             "icon": "🛡️",
             "title": "2. Verified Sender Address",
-            "desc": f"The sender address ('{sender_text}') matches authentic business standards with no deceptive tricks."
+            "desc": f"The sender address ('{safe_sender}') matches authentic business standards with no deceptive tricks."
         })
         reasons.append({
             "type": "safe",
@@ -1038,10 +1031,10 @@ st.markdown(
     """
 <div class="app-header">
     <div class="brand-section">
-        <div class="brand-logo">🛡️</div>
+        <div class="brand-logo">🔍</div>
         <div>
-            <div class="brand-title">PhishGuard <span>AI</span></div>
-            <div class="brand-sub">NLP-Driven Email Threat Intelligence & Risk Ranking System</div>
+            <div class="brand-title">Mail-Lens <span>AI</span></div>
+            <div class="brand-sub">NLP-Driven Email Threat Analysis &amp; Risk Assessment</div>
         </div>
     </div>
     <div class="student-card">
@@ -1327,14 +1320,14 @@ if has_content:
                 '<div style="font-size: 12px; font-weight: 800; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP THREAT KEYWORDS DETECTED:</div>',
                 unsafe_allow_html=True,
             )
-            chips_threat = "".join([f'<span class="token-chip tc-threat">{t["token"]} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
+            chips_threat = "".join([f'<span class="token-chip tc-threat">{html.escape(t["token"])} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
             st.markdown(chips_threat, unsafe_allow_html=True)
         elif res.top_safe_tokens:
             st.markdown(
                 '<div style="font-size: 12px; font-weight: 800; color: #059669; font-family: \'JetBrains Mono\', monospace; margin: 10px 0 4px 0;">TOP BENIGN KEYWORDS DETECTED:</div>',
                 unsafe_allow_html=True,
             )
-            chips_safe = "".join([f'<span class="token-chip tc-safe">{t["token"]} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
+            chips_safe = "".join([f'<span class="token-chip tc-safe">{html.escape(t["token"])} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
             st.markdown(chips_safe, unsafe_allow_html=True)
 
     # --------------------------------------------
@@ -1380,7 +1373,7 @@ if has_content:
         <div class="action-icon">{action_icon}</div>
         <div>
             <div class="action-content-title">Recommended Security Action</div>
-            <div class="action-content-body">{res.recommendation}</div>
+            <div class="action-content-body">{html.escape(res.recommendation)}</div>
         </div>
     </div>
     """,
@@ -1441,7 +1434,7 @@ else:
                 </div>
                 <div class="verdict-title" style="color: #475569;">STANDBY</div>
                 <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                    Calibrated Linear SVM · 10,020 Features · Ready for Evaluation
+                    Calibrated Linear SVM · 10,000 N-Gram Features · Ready for Evaluation
                 </div>
             </div>
             <div style="text-align: right;">
@@ -1522,7 +1515,7 @@ else:
         <div class="action-icon">💡</div>
         <div>
             <div class="action-content-title">Recommended Security Action</div>
-            <div class="action-content-body">Please enter an email in the console above or select a preset scenario. PhishGuard AI will classify the threat, highlight malicious keywords, and provide actionable security guidance.</div>
+            <div class="action-content-body">Please enter an email in the console above or select a preset scenario. Mail-Lens AI will classify the threat, highlight malicious keywords, and provide actionable security guidance.</div>
         </div>
     </div>
     """,
@@ -1555,23 +1548,23 @@ st.markdown(
         </div>
         <div class="footer-stat-card">
             <div class="footer-stat-label">NLP Feature Space</div>
-            <div class="footer-stat-val">10,020 Features</div>
-            <div class="footer-stat-sub">TF-IDF Word (1-2) N-Grams + Sublinear TF</div>
+            <div class="footer-stat-val">10,000 Features</div>
+            <div class="footer-stat-sub">TF-IDF Word (1-2) N-Grams + 20 Heuristics</div>
         </div>
         <div class="footer-stat-card">
             <div class="footer-stat-label">Model Accuracy</div>
             <div class="footer-stat-val" style="color: #059669;">98.64%</div>
-            <div class="footer-stat-sub">Macro F1: 0.9761 on 82k Corpus</div>
+            <div class="footer-stat-sub">Macro F1: 0.9761 on 17,960 Corpus</div>
         </div>
         <div class="footer-stat-card">
             <div class="footer-stat-label">Engineering Quality</div>
-            <div class="footer-stat-val" style="color: #2563eb;">58/58 Tests Passing</div>
+            <div class="footer-stat-val" style="color: #2563eb;">71/71 Tests Passing</div>
             <div class="footer-stat-sub">100% Pass Rate · Latency: ~12ms</div>
         </div>
     </div>
     <div class="footer-bottom-row">
         <div>
-            Training Dataset: <strong>Enron Corporate & Real Phishing Email Corpora (82,486 emails)</strong>
+            Training Dataset: <strong>HuggingFace & Zenodo Phishing/Benign Corpora (17,960 emails)</strong>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <span class="footer-badge-pill">⚡ Real-Time NLP Pipeline</span>

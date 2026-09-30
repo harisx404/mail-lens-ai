@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Text Preprocessor
+Mail-Lens AI — Text Preprocessor
 
 NLP preprocessing pipeline for email text:
 1. HTML tag removal

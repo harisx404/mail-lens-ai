@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Main Training Script
+Mail-Lens AI — Main Training Script
 
 Executes the full training pipeline:
   Phase 2: Data Pipeline
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 def main():
     """Execute the full training pipeline."""
     logger.info("=" * 70)
-    logger.info("PHISHGUARD AI — TRAINING PIPELINE")
+    logger.info("Mail-Lens AI — TRAINING PIPELINE")
     logger.info("=" * 70)
 
     # ============================================

@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Model Evaluation
+Mail-Lens AI — Model Evaluation
 
 Computes and reports all evaluation metrics:
   - Accuracy

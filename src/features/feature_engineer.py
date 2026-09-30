@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Feature Engineering Pipeline
+Mail-Lens AI — Feature Engineering Pipeline
 
 Combines NLP features (TF-IDF) with cybersecurity features into a
 single feature matrix for ML training and inference.

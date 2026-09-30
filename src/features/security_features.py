@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Cybersecurity Feature Extractor
+Mail-Lens AI — Cybersecurity Feature Extractor
 
 Extracts security-specific features from email text for the ML pipeline.
 
@@ -223,8 +223,8 @@ class SecurityFeatureExtractor:
                     if hostname.endswith(tld):
                         features["suspicious_tld_count"] += 1
                         break
-            except Exception:
-                pass
+            except (ValueError, AttributeError) as e:
+                logger.debug(f"URL parsing failed for TLD analysis on '{url}': {e}")
 
         return features
 

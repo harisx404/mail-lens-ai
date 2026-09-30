@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Project Configuration
+Mail-Lens AI — Project Configuration
 
 Central configuration for all project settings.
 Uses environment variables with sensible defaults.

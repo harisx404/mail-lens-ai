@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Model Trainer
+Mail-Lens AI — Model Trainer
 
 Trains and evaluates multiple ML classifiers:
   - Logistic Regression (baseline)

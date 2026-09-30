@@ -1,5 +1,5 @@
 """
-PhishGuard AI — Dataset Loader
+Mail-Lens AI — Dataset Loader
 
 Downloads and loads the raw datasets:
   - Dataset A: HuggingFace phishing-email-dataset (binary: Safe/Phishing)

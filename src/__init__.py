@@ -1,1 +1,1 @@
-"""PhishGuard AI — Source Package"""
+"""Mail-Lens AI — Source Package"""

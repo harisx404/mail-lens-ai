@@ -1,5 +1,4 @@
-# ============================================
-# PHISHGUARD AI — Requirements
+# Mail-Lens AI — Dependencies
 # ============================================
 
 # --- Core Data Science ---
@@ -41,5 +40,3 @@ tqdm>=4.65.0
 # --- Model Explainability (optional) ---
 # shap>=0.42.0         # Uncomment if SHAP is needed (heavy dependency)
 
-# --- Presentation ---
-python-pptx>=0.6.21    # PowerPoint generation

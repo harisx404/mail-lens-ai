@@ -1,7 +1,7 @@
 [project]
-name = "phishguard-ai"
+name = "mail-lens-ai"
 version = "1.0.0"
-description = "NLP-Based Phishing & Malicious Email Detection and Risk Analysis System"
+description = "NLP-based email security analysis — classifies emails as legitimate, phishing, or malicious"
 authors = [
     { name = "Muhammad Haris" }
 ]
