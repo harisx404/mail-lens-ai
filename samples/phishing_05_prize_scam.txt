@@ -1,0 +1,16 @@
+CATEGORY: PHISHING
+SCENARIO: Lottery scam / advance-fee fraud
+
+---
+From: prize-notification@international-lottery.ml
+Subject: CONGRATULATIONS! You have won $1,500,000
+
+Dear Winner,
+
+You have been selected as the winner of our international lottery draw. Your prize of USD 1,500,000 is ready for immediate transfer.
+
+To claim your prize, send your full name, address, and a processing fee of $250 to our agent at agent.claims@prize-transfer.ga.
+
+Congratulations once again!
+
+International Lottery Commission

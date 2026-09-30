@@ -1,0 +1,16 @@
+CATEGORY: MALICIOUS
+SCENARIO: Executable malware delivery via fake invoice
+
+---
+From: billing@accounting-portal.net
+Subject: OVERDUE: Invoice INV-2026-9981 — immediate action required
+
+Your invoice INV-2026-9981 is overdue by 21 days. Total outstanding: $3,450.00.
+
+To avoid legal action, run the attached payment verification utility before end of business today.
+
+Attached: invoice_payment_verify.exe
+
+If you have questions, contact our billing department.
+
+Accounts Receivable

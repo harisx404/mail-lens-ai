@@ -1,0 +1,19 @@
+CATEGORY: LEGITIMATE
+SCENARIO: Work meeting agenda
+
+---
+From: sarah.johnson@company.com
+Subject: Agenda for Thursday Engineering All-Hands
+
+Hi team,
+
+Here is the agenda for Thursday's engineering all-hands at 2:00 PM in Conference Room B (and Zoom):
+
+1. Q3 roadmap review — 20 min
+2. Infrastructure cost review — 15 min
+3. Open Q&A — 15 min
+
+Please add discussion items to the shared doc by noon tomorrow.
+
+Best,
+Sarah

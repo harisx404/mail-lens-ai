@@ -1,0 +1,19 @@
+CATEGORY: MALICIOUS
+SCENARIO: Fake vendor invoice with executable attachment
+
+---
+From: vendor@supplierportal-invoicing.com
+Subject: Please review attached invoice #VND-20260930
+
+Hi,
+
+Please find attached the invoice for services rendered in September 2026.
+
+Amount due: $8,750.00
+Due date: October 15, 2026
+
+To view the invoice, open the attached file: vendor_invoice_VND-20260930.pdf.exe
+
+Please process payment at your earliest convenience.
+
+Supplier Billing Department

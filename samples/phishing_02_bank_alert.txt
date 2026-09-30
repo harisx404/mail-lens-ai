@@ -1,0 +1,17 @@
+CATEGORY: PHISHING
+SCENARIO: Fake bank security alert
+
+---
+From: alerts@secure-bankofamerica-verify.com
+Subject: Action Required: Suspicious Transaction Detected
+
+Dear Account Holder,
+
+A suspicious transaction of $2,847.00 was attempted on your Bank of America account.
+
+To prevent unauthorized access, verify your identity within 12 hours:
+https://bankofamerica-secure-verification.top/confirm
+
+Failure to verify will result in your account being frozen.
+
+Bank of America Security Department
