@@ -1,282 +1,219 @@
-# 🛡️ PhishGuard AI
+# Mail-Lens AI
 
-### NLP-Based Phishing & Malicious Email Detection and Risk Analysis System
+**NLP-based email threat classification and risk analysis**
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red)](https://streamlit.io)
+[![Tests](https://img.shields.io/badge/Tests-71%20passing-brightgreen)](tests/)
+
+Mail-Lens AI analyzes email content and security-related signals to classify messages as **legitimate**, **phishing**, or **malicious**, and explains the factors behind each decision.
 
 ---
 
-## 📋 Overview
+## What it does
 
-**PhishGuard AI** is an NLP and machine-learning-based system that analyzes email content and classifies it into three categories:
+- Classifies emails into three categories: `LEGITIMATE`, `PHISHING`, or `MALICIOUS`
+- Assigns a risk score (0–1) and a risk level (`LOW` / `MEDIUM` / `HIGH` / `CRITICAL`)
+- Detects security indicators: urgency tactics, credential harvesting language, lookalike domains, executable references
+- Highlights suspicious keywords directly in the input text
+- Provides plain-English explanations and actionable recommendations
 
-| Category | Description |
+## How it works
+
+```
+Email Input (sender, subject, body)
+  ↓
+Text Preprocessing  →  HTML removal, URL/email normalization, lemmatization
+  ↓
+Feature Extraction  →  TF-IDF (10,000 n-grams) + 20 cybersecurity heuristics
+  ↓
+ML Classification   →  Calibrated Linear SVM (Experiment E3)
+  ↓
+Risk Assessment     →  Combined probability + heuristic score (0.0–1.0)
+  ↓
+Explainability      →  Token attribution + plain-English reason bullets
+  ↓
+Web Interface       →  Streamlit dashboard
+```
+
+## Technology stack
+
+| Component | Technology |
 |---|---|
-| 🟢 **LEGITIMATE** | Normal, non-malicious email |
-| 🟠 **PHISHING** | Social engineering / deception attempt |
-| 🔴 **MALICIOUS** | Harmful payload / malware delivery |
+| Web application | Streamlit |
+| ML classifier | scikit-learn (Calibrated LinearSVC) |
+| NLP | TF-IDF vectorization, NLTK lemmatization |
+| Data handling | pandas, numpy, scipy |
+| Visualization | Plotly |
+| Testing | pytest, pytest-cov |
 
-The system provides:
-- ✅ Email classification with confidence score
-- 📊 Risk level assessment (LOW / MEDIUM / HIGH / CRITICAL)
-- 🔍 Detected security indicators (urgency, credentials, URLs, etc.)
-- 📝 Human-readable explanation
-- 💡 Security recommendations
+## Dataset
 
----
+| Source | Samples | Role |
+|---|---|---|
+| HuggingFace — `zefang-liu/phishing-email-dataset` | 17,522 cleaned | Legitimate + Phishing baseline |
+| Zenodo — CC BY 4.0 multiclass NLP dataset | 438 samples | Targeted social engineering + Malware |
+| **Combined (deduplicated, stratified)** | **17,960** | **Final training corpus** |
 
-## 🎯 Problem Statement
+**Class distribution:** Legitimate 61.1% · Phishing 37.9% · Malicious 1.0%
 
-Phishing and malicious emails remain one of the most prevalent cybersecurity threats. Traditional rule-based filters struggle with sophisticated social engineering attacks. This project applies NLP and supervised machine learning to detect threatening emails based on their textual content and security-specific features.
+## Model results
 
----
+Five architectures were benchmarked on the same stratified splits (seed 42):
 
-## 🏗️ Architecture
+| Exp | Model | Features | Val Acc | Val Macro F1 |
+|---|---|---|---|---|
+| E1 | Logistic Regression | TF-IDF 10k | 97.33% | 0.9717 |
+| E2 | Multinomial Naive Bayes | TF-IDF 10k | 96.05% | 0.8922 |
+| **E3** | **Calibrated LinearSVC** | **TF-IDF 10k** | **97.94%** | **0.9760** |
+| E4 | Logistic Regression | TF-IDF + 20 security features | 97.44% | 0.9725 |
+| E5 | Calibrated LinearSVC | TF-IDF + 20 security features | 97.88% | 0.9657 |
 
-```
-Email Input
-    ↓
-Text Preprocessing (HTML removal, normalization, tokenization)
-    ↓
-Feature Extraction
-    ├── NLP Features (TF-IDF, n-grams)
-    └── Cybersecurity Features (URL analysis, keyword indicators)
-    ↓
-ML Classification (Logistic Regression / Naive Bayes / SVM)
-    ↓
-Risk Assessment + Explainability
-    ↓
-Web Interface (Streamlit)
-```
+**E3 (Calibrated LinearSVC)** was selected as the production model.
 
----
+### Held-out test set results (3,592 samples)
 
-## 📦 Installation
+| Metric | Value |
+|---|---|
+| Accuracy | **98.64%** |
+| Macro F1 | **0.9761** |
+| Weighted F1 | **0.9864** |
 
-### Prerequisites
-- Python 3.10 or higher
-- pip
+| Class | Precision | Recall | F1 | Support |
+|---|---|---|---|---|
+| LEGITIMATE | 0.9909 | 0.9877 | 0.9893 | 2,196 |
+| PHISHING | 0.9795 | 0.9853 | 0.9824 | 1,361 |
+| MALICIOUS | 0.9706 | 0.9429 | 0.9565 | 35 |
 
-### Setup
+> The MALICIOUS class has limited training support (177 samples total). Detection is functional but less robust than the other two classes.
+
+## Installation
+
+**Requirements:** Python 3.10+
 
 ```bash
-# 1. Clone the repository
-git clone <repository-url>
-cd phishguard-ai
+# Clone the repository
+git clone https://github.com/harisx404/mail-lens-ai.git
+cd mail-lens-ai
 
-# 2. Create virtual environment
+# Create and activate virtual environment
 python -m venv venv
+venv\Scripts\activate      # Windows
+# source venv/bin/activate  # macOS / Linux
 
-# 3. Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# 4. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 ```
 
----
+## Running the application
 
-## 🚀 Usage
-
-### Step 1: Train the Model
-
-```bash
-python scripts/train.py
-```
-
-This will:
-1. Download datasets automatically
-2. Preprocess and combine data
-3. Train multiple models (LR, NB, SVM)
-4. Evaluate and select the best model
-5. Save the trained model and artifacts
-
-### Step 2: Run the Web Application
+The trained model is included in the repository (`models/saved/`). No training step is required to run the app.
 
 ```bash
 streamlit run app/main.py
 ```
 
-The application will open at `http://localhost:8501`
+Open `http://localhost:8501` in your browser.
 
-### Step 3: Analyze Emails
+## Training from scratch
 
-1. Navigate to **🔍 Analyze Email**
-2. Enter the email subject and body
-3. Click **Analyze Email**
-4. Review the classification, risk level, and security indicators
-
----
-
-## 📊 Dataset & Unified Taxonomy
-
-| Dataset | Source | License | Cleaned Samples | Role in Project |
-|---|---|---|---|---|
-| **Phishing Email Detection** | [HuggingFace](https://huggingface.co/datasets/zefang-liu/phishing-email-dataset) | LGPL-3.0 | 17,522 | High-volume baseline (Legitimate & Phishing) |
-| **Multiclass NLP Threats** | [Zenodo](https://zenodo.org/records/15235123) | CC BY 4.0 | 438 | Targeted social engineering & Malware samples |
-| **Unified Corpus** | **Combined & Deduplicated** | Academic | **17,960** | **3-Class Taxonomy (Stratified 70/10/20)** |
-
-### Class Distribution
-- **LEGITIMATE**: 10,978 samples (61.1%)
-- **PHISHING**: 6,805 samples (37.9%)
-- **MALICIOUS**: 177 samples (1.0%)
-
----
-
-## 📈 Model Benchmark & Experimental Results
-
-All experiments evaluated on a stratified validation set of **1,796 samples** with fixed seed (42):
-
-| Exp | Architecture | Features | Accuracy | Macro F1 | Weighted F1 | Selection Status |
-|---|---|---|---|---|---|---|
-| **E1** | Logistic Regression | TF-IDF (10k n-grams) | 97.33% | 0.9717 | 0.9733 | Baseline |
-| **E2** | Multinomial Naive Bayes | TF-IDF (10k n-grams) | 96.05% | 0.8922 | 0.9611 | Probabilistic baseline |
-| **E3** | **Linear SVM (Calibrated)** | **TF-IDF (10k n-grams)** | **97.94%** | **0.9760** | **0.9794** | 🏆 **Best Model** |
-| **E4** | Logistic Regression | TF-IDF + 20 Security Features | 97.44% | 0.9725 | 0.9745 | Feature fusion |
-| **E5** | Linear SVM (Calibrated) | TF-IDF + 20 Security Features | 97.88% | 0.9657 | 0.9788 | Feature fusion |
-
-### 🏆 Final Evaluation on Held-Out Test Set (3,592 Samples)
-
-The winning model (**Linear SVM**) was evaluated on the unseen test split:
-
-* **Overall Test Accuracy:** **98.64%**
-* **Macro F1-Score:** **0.9761**
-* **Weighted F1-Score:** **0.9864**
-
-| Class | Precision | Recall | F1-Score | Support |
-|---|---|---|---|---|
-| **LEGITIMATE** | 0.9909 | 0.9877 | 0.9893 | 2,196 |
-| **PHISHING** | 0.9795 | 0.9853 | 0.9824 | 1,361 |
-| **MALICIOUS** | 0.9706 | 0.9429 | 0.9565 | 35 |
-
-#### Test Set Confusion Matrix
-
-```
-                      Predicted Legitimate   Predicted Phishing   Predicted Malicious
-Actual Legitimate :          2,169                   26                    1
-Actual Phishing   :             20                1,341                    0
-Actual Malicious  :              0                    2                   33
-```
-* **Malicious Detection Recall:** **94.3%** (33/35 hostile emails caught) with only **1 false positive** across 2,196 legitimate emails.
-
-
----
-
-## 🧪 Testing & Quality Assurance
-
-PhishGuard AI includes a rigorous test suite of **58 passing tests** achieving **75.6% overall code coverage** (with core modules exceeding 90%):
+If you want to retrain the model (downloads ~18k email datasets):
 
 ```bash
-# Run all unit and integration tests
+python scripts/train.py
+```
+
+This runs the full pipeline: data loading → preprocessing → feature engineering → 5-model benchmark → artifact saving.
+
+## Testing
+
+```bash
+# Run all tests
 python -m pytest tests/ -v
 
-# Run with test coverage report
+# Run with coverage report
 python -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
+**71/71 tests passing** · **76.77% statement coverage** across `src/`
+
 Test breakdown:
-- `tests/test_core.py` (36 tests): Preprocessing, tokenization, sanitization, basic features, and pipeline tests.
-- `tests/test_extended.py` (12 tests): Feature engineering, factory patterns, and evaluation metrics.
-- `tests/test_integration.py` (10 tests): End-to-end inference, regression tests for `.com` false positives, typosquatting/homoglyph detection (`rnicrosoft.com`), simulation cloaking, and state consistency.
+- `tests/test_core.py` (36): Preprocessing, features, data pipeline, configuration
+- `tests/test_extended.py` (12): Feature engineering, model factory, evaluation metrics
+- `tests/test_integration.py` (10): End-to-end inference, typosquatting, cloaking regression
+- `tests/test_qa_regression.py` (13): XSS escaping, boundary inputs, injection handling, latency
 
----
-
-## 📁 Project Structure
+## Project structure
 
 ```
-phishguard-ai/
+mail-lens-ai/
+├── app/
+│   └── main.py              # Streamlit web application
+├── src/
+│   ├── data/                # Dataset loading and processing pipeline
+│   ├── preprocessing/       # Text cleaning and normalization
+│   ├── features/            # TF-IDF feature engineering + 20 security features
+│   ├── models/              # Model training (LR, NB, SVM)
+│   ├── evaluation/          # Evaluation metrics and experiment comparison
+│   ├── inference/           # Production inference engine
+│   └── utils/               # Configuration and constants
+├── models/saved/            # Trained model artifacts
+├── data/
+│   ├── raw/                 # Raw datasets (downloaded by train.py)
+│   └── processed/           # Processed train/val/test splits
+├── tests/                   # Test suite (71 tests)
+├── scripts/
+│   └── train.py             # Training script
+├── notebooks/               # Jupyter EDA notebook
+├── docs/                    # Technical documentation
+├── samples/                 # Synthetic email examples for testing
 ├── README.md
+├── CHANGELOG.md
 ├── LICENSE
-├── .gitignore
-├── .env.example
 ├── requirements.txt
 ├── pyproject.toml
-│
-├── docs/                    # Architecture, design decisions, and reports
-├── data/
-│   ├── raw/                 # Raw datasets (Dataset A & Dataset B)
-│   └── processed/           # Processed splits (train, val, test)
-│
-├── src/
-│   ├── data/                # Data loading & pipeline
-│   ├── preprocessing/       # NLP text preprocessing (cleaner, lemmatizer)
-│   ├── features/            # Feature engineering (TF-IDF + 20 security features)
-│   ├── models/              # Model training (LR, NB, SVM)
-│   ├── evaluation/          # Model evaluation & metrics
-│   ├── inference/           # Production inference pipeline & risk scoring
-│   └── utils/               # Configuration & constants
-│
-├── app/                     # Streamlit web application
-│   └── main.py              # SOC Dashboard UI (v2.0)
-│
-├── models/saved/            # Serialized model artifacts & results JSON
-├── tests/                   # 58 unit, integration, and regression tests
-├── scripts/                 # Training & utility scripts
-├── notebooks/               # Jupyter notebooks for EDA
-└── presentation/            # Capstone presentation
-    ├── PhishGuard_AI_Presentation.html  # 10-page print-to-PDF presentation
-    └── presentation_slides.md           # Marp presentation slides
+├── .env.example
+└── .gitignore
 ```
 
----
+## Security and privacy
 
-## ⚠️ Limitations
+- All analysis is performed locally — no email content is sent to external services
+- No URLs are visited during analysis (pure static inspection)
+- No files or scripts referenced in emails are executed
+- Analyzed emails are processed in-memory and not persisted to disk
+- See [docs/SECURITY.md](docs/SECURITY.md) for the full security posture
 
-- This is a **research/educational capstone prototype**, not a production security product
-- The MALICIOUS class has limited training data (~177 samples) — detection may be less reliable
-- Training data is English-only
-- No real-time email interception or mailbox integration
-- No dynamic analysis (no URL visiting, no file execution)
-- Trained on specific datasets — domain shift to real-world emails is possible
-- False positives and false negatives are expected and documented
-- Cannot replace professional email security products (e.g., SEGs, sandboxes)
+## Limitations
 
----
+- Research prototype, not a production email security gateway
+- MALICIOUS class has limited training data (~177 samples)
+- English-only training data
+- No email header analysis (SPF, DKIM, DMARC)
+- No dynamic URL or attachment detonation
+- False positives and false negatives are expected and documented in [docs/LIMITATIONS.md](docs/LIMITATIONS.md)
 
-## 🔮 Future Improvements
+## Documentation
 
-- Larger, more balanced dataset for MALICIOUS class
-- Transformer-based models (DistilBERT / RoBERTa) for improved contextual nuances
-- Multi-language support (Urdu, Arabic, Spanish)
-- RFC 822 Email header analysis (SPF, DKIM, DMARC alignment)
-- Real-time SIEM API integration (Splunk, Microsoft Sentinel)
-- Active learning from security analyst feedback
-- Sandboxed URL detonation via VirusTotal API
+| Document | Description |
+|---|---|
+| [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | What the project is and why it exists |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design and data flow |
+| [docs/MACHINE_LEARNING.md](docs/MACHINE_LEARNING.md) | ML pipeline, training, and evaluation |
+| [docs/SECURITY.md](docs/SECURITY.md) | Security posture and privacy |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Installation and local development |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deployment options and considerations |
+| [docs/API.md](docs/API.md) | Inference engine API reference |
+| [docs/TESTING.md](docs/TESTING.md) | Test strategy and commands |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Known limitations and caveats |
+| [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md) | Comprehensive technical documentation |
 
----
+## Author
 
-## 🔒 Security & Privacy
+**Muhammad Haris** — S.No: 70  
+KPITB AI/ML Training Program — Final Capstone Project
 
-- No email content is sent to external APIs
-- All analysis is performed locally
-- No URLs are visited during analysis (pure static analysis)
-- No files or scripts are executed
-- Sanitized input handling against script injection
-- No sensitive data logging
-- Configuration via environment variables
+## License
 
----
-
-## 📄 Credits & References
-
-- **Datasets:** HuggingFace (zefang-liu), Zenodo (Engineering Ingegneria Informatica Spa)
-- **Libraries:** scikit-learn, NLTK, Streamlit, Plotly, pandas, numpy
-- **Methodology:** TF-IDF vectorization, supervised classification, cybersecurity feature engineering
-
----
-
-## 👤 Author
-
-**Muhammad Haris**  
-**S.No:** 70  
-**Program:** KPITB AI/ML Training Program  
-**Project:** Final Capstone Project  
-
----
-
-*Built with ❤️ and 🔬 as an AI/ML capstone project.*
+MIT — see [LICENSE](LICENSE).

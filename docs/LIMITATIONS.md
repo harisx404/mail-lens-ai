@@ -1,110 +1,47 @@
-# PhishGuard AI — Limitations
+# Limitations
 
-## Honest Assessment of Project Limitations
+This document describes known limitations of Mail-Lens AI. These are genuine constraints, not conservative disclaimers.
 
-This document transparently describes the known limitations of PhishGuard AI. This system is a **research/educational capstone prototype** and should NOT be treated as a production email security product.
+## Dataset limitations
 
----
+**MALICIOUS class is severely underrepresented.** The training corpus contains 177 malicious samples out of 17,960 total (0.99%). While the test recall is 94.3% (33/35), this is measured on a small holdout set of 35 emails. Real-world performance against diverse malware delivery campaigns is unknown and should not be assumed from this figure.
 
-## Dataset Limitations
+**English-only training.** All training data is in English. Performance on emails in other languages is untested and expected to degrade significantly.
 
-### 1. Class Imbalance
-The MALICIOUS class has significantly fewer training samples (~100-200) compared to LEGITIMATE and PHISHING (~9,000+ each). This means:
-- The model may be less reliable at detecting malicious emails
-- Per-class metrics for MALICIOUS may be lower
-- Class weighting is used to mitigate but cannot fully compensate
+**Snapshot datasets.** Phishing and malware language evolves constantly. The training data represents a snapshot of known attack patterns. Novel techniques that differ substantially from the training distribution may not be caught.
 
-### 2. Dataset Representativeness
-- Training data comes from specific public datasets, which may not represent the full diversity of real-world email threats
-- Modern phishing techniques (AI-generated phishing, highly targeted spear-phishing) may not be well-represented
-- The dataset is English-only — non-English emails are not supported
+**Limited social engineering diversity.** The Legitimate/Phishing split in the training data is primarily drawn from a single HuggingFace dataset. This may not represent the full range of real-world phishing styles.
 
-### 3. Dataset B Message Quality
-- Dataset B (Zenodo) contains "email or SMS-like" messages (624 total), not necessarily full email formats
-- These shorter messages may not represent typical email patterns
+## Model limitations
 
-### 4. Domain Shift
-- Models trained on historical data may not generalize to new, unseen attack patterns
-- Phishing techniques evolve constantly — the model cannot detect previously unseen attack types
+**False positives on aggressive legitimate emails.** Legitimate marketing emails with urgency language (e.g., "limited time offer", "act now") may trigger threat indicators and receive elevated risk scores. The model attempts to distinguish context, but miscalibration is possible.
 
----
+**False negatives on sophisticated phishing.** A carefully crafted phishing email that avoids all keyword patterns and uses novel phrasing may be classified as legitimate. The model learned from historical patterns — it cannot detect zero-day social engineering approaches.
 
-## Model Limitations
+**MALICIOUS vs PHISHING boundary.** The distinction between malicious (payload delivery) and phishing (credential harvesting) can be ambiguous in real emails. Some emails that carry both social engineering and payload components may be classified as one or the other, not both.
 
-### 5. No Guaranteed Detection
-- No ML model achieves 100% accuracy
-- False positives (legitimate email flagged as threat) and false negatives (threat missed) are expected
-- The model cannot detect zero-day attacks or novel social engineering techniques
+**No header protocol analysis.** SPF, DKIM, and DMARC are the most reliable signals for sender authenticity in production email security. This system analyzes only the text content of emails, not their headers. An attacker who spoofs a legitimate domain (and passes header checks) while sending obviously malicious content may still be caught, but a sophisticated domain spoofing attack paired with subtle content might not be.
 
-### 6. Text-Only Analysis
-- The model analyzes text content only
-- No analysis of: email headers (SPF, DKIM, DMARC), sender reputation, attachment binaries, network indicators
-- Real email security requires multiple layers of defense
+## Feature limitations
 
-### 7. Static Analysis Only
-- No URLs are visited or resolved
-- No files are executed or sandboxed
-- No DNS lookups performed
-- This limits detection of sophisticated attacks that require dynamic analysis
+**Static URL inspection only.** URLs are detected and flagged for suspicious TLDs, IP addresses, and URL shorteners. The application does not resolve or visit URLs, so it cannot inspect the landing page content or check against real-time blocklists (e.g., VirusTotal, Google Safe Browsing).
 
-### 8. Baseline Models
-- The project uses traditional ML models (LR, NB, SVM) with TF-IDF features
-- More sophisticated approaches (transformer models, graph neural networks) may perform better
-- The baseline approach is chosen for interpretability and computational efficiency
+**Attachment content is not inspected.** References to attachment filenames (e.g., `.exe`) are detected, but actual attachment content is not accessible or analyzed.
 
----
+**No email metadata.** Sender reputation, email routing headers, bounce patterns, and volume information are not available in the static text analysis.
 
-## Application Limitations
+## Application limitations
 
-### 9. Risk Score
-- The risk assessment is an **application-level heuristic**, not an objectively validated security rating
-- It combines model confidence with keyword-based indicators
-- It should not be used as a sole basis for security decisions
+**Prototype architecture.** The application runs as a single Streamlit process. It has no rate limiting, authentication, or multi-user isolation beyond Streamlit's session state mechanism.
 
-### 10. Security Indicators
-- The detected security indicators (urgency, credentials, etc.) are based on keyword matching
-- They are NOT the exact reasons the ML model made its prediction
-- They are additional contextual signals, not causal explanations
+**Inference explanation is probabilistic, not causal.** The token attribution (top threat tokens / top safe tokens) shows which n-grams statistically correlate with threat classes based on LinearSVC coefficients. It does not definitively explain why the model made its decision in a causal sense — it is a post-hoc approximation.
 
-### 11. No Real-Time Processing
-- The application processes individual emails on demand
-- No real-time email stream processing
-- No integration with email servers (IMAP, Exchange, etc.)
+**Risk score is heuristic.** The 0.0–1.0 risk score combines ML probabilities and keyword-based security heuristics. The weighting formula (`_compute_risk_score` in `engine.py`) was designed to be directionally correct but is not calibrated against a validated security ground truth.
 
-### 12. Session-Only History
-- Analysis history is stored in Streamlit session state
-- History is lost when the application restarts
-- No persistent database storage
+## What this system cannot replace
 
----
-
-## Security Limitations
-
-### 13. Not a Replacement
-This system **cannot replace** professional email security solutions such as:
-- Secure Email Gateways (SEGs)
-- Email sandboxing solutions
-- Threat intelligence platforms
-- SIEM systems
-- Anti-malware products
-
-### 14. Adversarial Vulnerability
-- An attacker aware of the model's features could craft emails to evade detection
-- Text obfuscation, homoglyph attacks, and image-based phishing are not handled
-- The system does not have adversarial robustness training
-
----
-
-## What This System IS
-
-✅ A research/educational prototype demonstrating NLP + ML for email security
-✅ A capstone project showing supervised learning, feature engineering, and evaluation
-✅ An explainable analysis tool with transparent limitations
-✅ A well-documented, reproducible ML pipeline
-
-## What This System IS NOT
-
-❌ A production email security product
-❌ A guaranteed phishing detector
-❌ A replacement for security training and awareness
-❌ A real-time email filtering system
+- Production email security gateways (Proofpoint, Mimecast, Microsoft Defender for Office 365)
+- Sandboxed URL and attachment detonation (Any.run, Cuckoo)
+- Real-time threat intelligence feeds
+- Human security analyst judgment for ambiguous cases
+- DNS/SMTP-level sender authentication (SPF/DKIM/DMARC enforcement)
