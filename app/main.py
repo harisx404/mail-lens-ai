@@ -70,17 +70,35 @@ st.markdown(
         font-size: 14px !important;
     }
 
-    /* 1920x1080 Scaled Container */
-    .main .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 2.5rem !important;
-        max-width: 1680px !important;
+    /* Completely eliminate Streamlit default header space */
+    header[data-testid="stHeader"],
+    header,
+    .stApp > header {
+        display: none !important;
+        height: 0px !important;
+        min-height: 0px !important;
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+    #MainMenu,
+    footer,
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+        height: 0px !important;
     }
 
-    /* Hide Streamlit default headers/footers */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* Responsive Main Container — minimal top spacing */
+    .main .block-container,
+    [data-testid="stMainBlockContainer"],
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 2.5rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        max-width: 1680px !important;
+    }
 
     /* 1. TOP HEADER */
     .app-header {
@@ -491,7 +509,7 @@ st.markdown(
     }
     .footer-stats-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 14px;
     }
     .footer-stat-card {
@@ -627,6 +645,141 @@ st.markdown(
         padding: 12px 16px;
         max-height: 240px;
         overflow-y: auto;
+    }
+
+    /* ========================================================
+       RESPONSIVE DESIGN & MOBILE/TABLET BREAKPOINTS
+       ======================================================== */
+
+    /* Medium Laptops & Desktops */
+    @media (max-width: 1200px) {
+        .main .block-container,
+        [data-testid="stMainBlockContainer"],
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
+        }
+        .footer-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    /* Tablets & Foldables (Stack 2-column layout into clean single-column) */
+    @media (max-width: 900px) {
+        div[data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+            gap: 12px !important;
+        }
+        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+        .app-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            padding: 14px 18px !important;
+        }
+        .student-card {
+            width: 100% !important;
+            text-align: left !important;
+            padding: 10px 14px !important;
+        }
+        .footer-top-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+        }
+        .footer-author {
+            text-align: left !important;
+        }
+        .footer-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    /* Mobile Phones & Handheld Devices */
+    @media (max-width: 600px) {
+        .main .block-container,
+        [data-testid="stMainBlockContainer"],
+        .block-container {
+            padding-top: 0.3rem !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .app-header {
+            padding: 12px 14px !important;
+            margin-bottom: 12px !important;
+        }
+        .brand-logo {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 16px !important;
+            border-radius: 10px !important;
+        }
+        .brand-title {
+            font-size: 16px !important;
+        }
+        .brand-sub {
+            font-size: 12px !important;
+        }
+        .student-name {
+            font-size: 15px !important;
+        }
+        .student-meta {
+            font-size: 11px !important;
+        }
+        .section-title {
+            font-size: 14px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px !important;
+        }
+        div[data-testid="stButton"] button {
+            height: 44px !important;
+            min-height: 44px !important;
+            font-size: 13px !important;
+            padding: 6px 10px !important;
+        }
+        div[data-testid="stButton"] button p {
+            font-size: 13px !important;
+            white-space: normal !important;
+            text-align: center !important;
+        }
+        .action-container {
+            flex-direction: column !important;
+            padding: 14px 16px !important;
+            gap: 8px !important;
+        }
+        .footer-card {
+            padding: 16px 14px !important;
+        }
+        .footer-stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+        .footer-bottom-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+        }
+        .reason-desc {
+            margin-left: 0 !important;
+            margin-top: 4px !important;
+        }
+        .reason-box {
+            padding: 12px 14px !important;
+        }
+        .inspector-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 6px !important;
+        }
+        .inspector-body {
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+        }
     }
 </style>
 """,
