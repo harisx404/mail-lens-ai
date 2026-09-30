@@ -1,19 +1,19 @@
 """
-PhishGuard AI — Integration and Regression Test Suite.
+Mail-Lens AI — Integration and Regression Test Suite.
 
 Tests end-to-end inference pipelines, adversarial evasion techniques,
 typosquatting detection, simulation cloaking, and false positive prevention.
 """
 
 import pytest
-from src.inference.engine import PhishGuardInference
+from src.inference.engine import MailLensInference
 from src.features.security_features import SecurityFeatureExtractor
 
 
 @pytest.fixture(scope="module")
 def engine():
     """Shared inference engine for integration tests."""
-    return PhishGuardInference("models/saved")
+    return MailLensInference("models/saved")
 
 
 @pytest.fixture(scope="module")

@@ -288,8 +288,8 @@ class TestTrainedModelInference:
     """Tests for the trained model and inference engine."""
 
     def setup_method(self):
-        from src.inference.engine import PhishGuardInference
-        self.engine = PhishGuardInference()
+        from src.inference.engine import MailLensInference
+        self.engine = MailLensInference()
 
     def test_model_loaded(self):
         assert self.engine._is_loaded is True
