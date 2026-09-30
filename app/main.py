@@ -1,9 +1,9 @@
 """
 PhishGuard AI — Executive Single-Page AI/ML Capstone Dashboard
 
-Designed for Muhammad Haris (S.No: 70) — KPITB AI/ML Training Program
-Focus: Artificial Intelligence, Natural Language Processing, Model Explainability
-Architecture: Calibrated Linear SVM + TF-IDF (10,020 Features), 98.64% Test Accuracy
+Student: Muhammad Haris (S.No: 70)
+Program: KPITB AI/ML Training Program — Final Capstone Project
+Model: Calibrated Linear SVM + TF-IDF (10,020 Features) — 98.64% Accuracy
 """
 
 import sys
@@ -15,19 +15,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import datetime
 import json
-import math
 import re
-from collections import Counter
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.features.security_features import SecurityFeatureExtractor
-from src.inference.engine import AnalysisResult, PhishGuardInference
-from src.preprocessing.text_preprocessor import TextPreprocessor
+from src.inference.engine import PhishGuardInference
 from src.utils.config import MAX_EMAIL_LENGTH, MODELS_DIR
 
 # ============================================
@@ -41,52 +36,42 @@ st.set_page_config(
 )
 
 # ============================================
-# Shannon Entropy Helper
-# ============================================
-def compute_shannon_entropy(text: str) -> float:
-    if not text:
-        return 0.0
-    counts = Counter(text)
-    total = len(text)
-    return round(-sum((c / total) * math.log2(c / total) for c in counts.values()), 2)
-
-
-# ============================================
-# Global CSS (Light, Clean, Professional)
+# Global CSS (Clean, Modern, Enlarged Typography)
 # ============================================
 st.markdown(
     """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* Clean Theme Variables */
+    /* Theme Variables */
     :root {
-        --bg-page: #f8fafc;
-        --card-bg: #ffffff;
-        --card-border: #e2e8f0;
+        --canvas: #f8fafc;
+        --card: #ffffff;
+        --border: #cbd5e1;
+        --border-subtle: #e2e8f0;
         --ink-title: #0f172a;
-        --ink-text: #334155;
+        --ink-body: #334155;
         --ink-muted: #64748b;
         --brand-blue: #2563eb;
         --brand-blue-hover: #1d4ed8;
     }
 
-    /* Overall Canvas */
+    /* Base Canvas */
     .stApp {
-        background-color: var(--bg-page) !important;
+        background-color: var(--canvas) !important;
         font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
-        color: var(--ink-text) !important;
+        color: var(--ink-body) !important;
     }
 
     .main .block-container {
-        padding-top: 1rem !important;
+        padding-top: 1.2rem !important;
         padding-bottom: 2rem !important;
-        max-width: 1440px !important;
+        max-width: 1400px !important;
     }
 
-    /* Hide Streamlit default chrome */
+    /* Hide Streamlit default headers/footers */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -94,36 +79,36 @@ st.markdown(
     /* Executive Top Bar */
     .app-header {
         background: #ffffff;
-        border: 1px solid var(--card-border);
+        border: 1.5px solid var(--border-subtle);
         border-radius: 12px;
-        padding: 14px 20px;
-        margin-bottom: 14px;
+        padding: 16px 24px;
+        margin-bottom: 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 12px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        gap: 14px;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
     .brand-section {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
     }
     .brand-logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
         background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 26px;
         color: #ffffff;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
     }
     .brand-title {
-        font-size: 20px;
+        font-size: 24px;
         font-weight: 800;
         color: var(--ink-title);
         margin: 0;
@@ -134,255 +119,118 @@ st.markdown(
         color: var(--brand-blue);
     }
     .brand-sub {
-        font-size: 11px;
+        font-size: 13px;
         color: var(--ink-muted);
         font-weight: 500;
-        margin: 2px 0 0 0;
+        margin: 3px 0 0 0;
     }
 
     .header-badges {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: wrap;
     }
-    .pill-badge {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 5px 12px;
+    .badge-pill {
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 6px 14px;
         border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .badge-ai {
         background: #eff6ff;
         color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        border: 1.5px solid #bfdbfe;
         font-family: 'JetBrains Mono', monospace;
     }
-    .student-badge {
+    .student-card {
         background: #ffffff;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 6px 14px;
+        border: 1.5px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 8px 16px;
         text-align: right;
     }
     .student-name {
-        font-size: 13px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 800;
         color: var(--ink-title);
         line-height: 1.2;
     }
     .student-meta {
-        font-size: 10px;
+        font-size: 12px;
         color: var(--brand-blue);
         font-family: 'JetBrains Mono', monospace;
         font-weight: 600;
     }
 
-    /* Sub-header Context Ribbon */
-    .context-bar {
-        background: #ffffff;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 8px 16px;
-        margin-bottom: 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        font-size: 11px;
-        color: var(--ink-muted);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-    }
-    .context-bar strong {
-        color: var(--ink-title);
-    }
-
-    /* Cards */
-    .clean-card {
-        background: #ffffff;
-        border: 1px solid var(--card-border);
-        border-radius: 12px;
-        padding: 18px;
-        margin-bottom: 14px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-    .card-title {
-        font-size: 13px;
-        font-weight: 700;
+    /* Section Headers */
+    .section-title {
+        font-size: 14px;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
         color: var(--ink-title);
         margin-bottom: 12px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid var(--card-border);
+        border-bottom: 1.5px solid var(--border-subtle);
         padding-bottom: 8px;
     }
 
-    /* Verdict Banners */
-    .verdict-banner {
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-width: 1px;
-        border-style: solid;
+    /* Streamlit Scenario Preset Buttons */
+    div[data-testid="stButton"] button {
+        background-color: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        color: #0f172a !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        padding: 6px 14px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        width: 100% !important;
     }
-    .vb-phish {
-        background: #fffbeb;
-        border-color: #fde68a;
+    div[data-testid="stButton"] button:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        color: #1d4ed8 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px -2px rgba(37, 99, 235, 0.18) !important;
     }
-    .vb-legit {
-        background: #ecfdf5;
-        border-color: #a7f3d0;
+    div[data-testid="stButton"] button:active {
+        transform: translateY(0px) !important;
+        background-color: #dbeafe !important;
     }
-    .vb-mal {
-        background: #fef2f2;
-        border-color: #fecaca;
-    }
-    .vb-title {
-        font-size: 24px;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-    }
-    .vt-phish { color: #d97706; }
-    .vt-legit { color: #059669; }
-    .vt-mal { color: #dc2626; }
-
-    /* Score Badges */
-    .score-chip {
-        font-size: 26px;
-        font-weight: 800;
-        font-family: 'JetBrains Mono', monospace;
-        line-height: 1.0;
-    }
-
-    /* Metrics Grid */
-    .metrics-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 14px;
-    }
-    .metric-box {
-        background: #f8fafc;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 10px 14px;
-    }
-    .metric-label {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--ink-muted);
-    }
-    .metric-val {
-        font-size: 20px;
-        font-weight: 800;
-        color: var(--ink-title);
-        margin: 2px 0;
-        font-family: 'JetBrains Mono', monospace;
-    }
-    .metric-sub {
-        font-size: 10px;
-        color: var(--ink-muted);
+    div[data-testid="stButton"] button p {
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: inherit !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
     }
 
-    /* Token Attribution Chips */
-    .token-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 8px;
-        border-radius: 4px;
-        margin: 2px 4px 2px 0;
-    }
-    .tc-threat {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fca5a5;
-    }
-    .tc-safe {
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #6ee7b7;
-    }
-
-    /* Pipeline Flow */
-    .pipe-step-box {
-        background: #f8fafc;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 10px 12px;
-        text-align: center;
-    }
-    .pipe-step-num {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--brand-blue);
-    }
-    .pipe-step-title {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--ink-title);
-        margin: 2px 0;
-    }
-    .pipe-step-meta {
-        font-size: 10px;
-        color: var(--ink-muted);
-    }
-
-    /* Viva Defense Cards */
-    .viva-box {
-        background: #ffffff;
-        border: 1px solid var(--card-border);
-        border-left: 4px solid var(--brand-blue);
-        border-radius: 8px;
-        padding: 12px 14px;
-        margin-bottom: 8px;
-    }
-    .viva-title {
-        font-size: 12px;
-        font-weight: 700;
-        color: #1e3a8a;
-        margin-bottom: 2px;
-    }
-    .viva-desc {
-        font-size: 11px;
-        color: var(--ink-text);
-        line-height: 1.4;
-    }
-
-    /* ========================================= */
-    /* Streamlit Input & Textarea Elements       */
-    /* ========================================= */
+    /* Form Input & Textarea Elements */
     div[data-testid="stTextInput"] div[data-baseweb="base-input"],
     div[data-testid="stTextArea"] div[data-baseweb="textarea"] {
         background-color: #ffffff !important;
         border: 1.5px solid #cbd5e1 !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
         transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
-
     div[data-testid="stTextInput"] div[data-baseweb="base-input"]:focus-within,
     div[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within {
         border-color: #2563eb !important;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
     }
-
     div[data-testid="stTextInput"] input,
     div[data-testid="stTextArea"] textarea {
         background: transparent !important;
@@ -391,89 +239,35 @@ st.markdown(
         box-shadow: none !important;
         color: #0f172a !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 13.5px !important;
+        font-size: 14.5px !important;
         font-weight: 500 !important;
         line-height: 1.5 !important;
-        padding: 8px 12px !important;
-    }
-
-    /* Input & Textarea Labels */
-    div[data-testid="stTextInput"] label,
-    div[data-testid="stTextArea"] label {
-        margin-bottom: 2px !important;
+        padding: 10px 14px !important;
     }
     div[data-testid="stTextInput"] label p,
     div[data-testid="stTextArea"] label p {
-        font-size: 11px !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
-        color: #475569 !important;
-        margin: 0 !important;
+        color: #334155 !important;
+        margin: 0 0 4px 0 !important;
     }
 
-    /* ========================================= */
-    /* Streamlit Scenario Preset Buttons         */
-    /* ========================================= */
-    div[data-testid="stButton"] button {
-        background-color: #ffffff !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-        color: #1e293b !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        height: 42px !important;
-        min-height: 42px !important;
-        max-height: 42px !important;
-        padding: 4px 10px !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        text-align: center !important;
-        cursor: pointer !important;
-        width: 100% !important;
-    }
-    div[data-testid="stButton"] button:hover {
-        background-color: #eff6ff !important;
-        border-color: #2563eb !important;
-        color: #1d4ed8 !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.12) !important;
-    }
-    div[data-testid="stButton"] button:active {
-        transform: translateY(0px) !important;
-        background-color: #dbeafe !important;
-    }
-    div[data-testid="stButton"] button p {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: inherit !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1.2 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-
-    /* ========================================= */
-    /* Primary Submit Button                     */
-    /* ========================================= */
+    /* Primary Submit Button */
     div[data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
         border: none !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         color: #ffffff !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 14px !important;
+        font-size: 15.5px !important;
         font-weight: 700 !important;
-        height: 46px !important;
-        min-height: 46px !important;
-        padding: 10px 20px !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28) !important;
+        height: 52px !important;
+        min-height: 52px !important;
+        padding: 12px 24px !important;
+        letter-spacing: 0.02em !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.32) !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: flex !important;
         align-items: center !important;
@@ -483,8 +277,8 @@ st.markdown(
     }
     div[data-testid="stFormSubmitButton"] button:hover {
         background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
-        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4) !important;
-        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+        transform: translateY(-2px) !important;
     }
     div[data-testid="stFormSubmitButton"] button:active {
         transform: translateY(0px) !important;
@@ -492,11 +286,98 @@ st.markdown(
     }
     div[data-testid="stFormSubmitButton"] button p {
         color: #ffffff !important;
-        font-size: 14px !important;
+        font-size: 15.5px !important;
         font-weight: 700 !important;
         margin: 0 !important;
         padding: 0 !important;
     }
+
+    /* Verdict Banners */
+    .verdict-card {
+        border-radius: 12px;
+        padding: 18px 24px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-width: 1.5px;
+        border-style: solid;
+    }
+    .vc-phish { background: #fffbeb; border-color: #fde68a; }
+    .vc-legit { background: #ecfdf5; border-color: #a7f3d0; }
+    .vc-mal   { background: #fef2f2; border-color: #fecaca; }
+
+    .verdict-headline {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .vh-phish { color: #d97706; }
+    .vh-legit { color: #059669; }
+    .vh-mal   { color: #dc2626; }
+
+    .status-tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11.5px;
+        font-weight: 800;
+        padding: 5px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .stag-phish { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .stag-legit { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .stag-mal   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* 2 Big Primary KPI Cards */
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+    .kpi-card {
+        background: #ffffff;
+        border: 1.5px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 14px 18px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .kpi-title {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-muted);
+    }
+    .kpi-big {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin: 4px 0;
+    }
+    .kpi-subtext {
+        font-size: 11.5px;
+        font-weight: 500;
+        color: var(--ink-muted);
+    }
+
+    /* Token Attribution Chips */
+    .token-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 6px;
+        margin: 3px 5px 3px 0;
+    }
+    .tc-threat { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .tc-safe   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -505,17 +386,14 @@ st.markdown(
 # ============================================
 # Engine Loading
 # ============================================
-@st.cache_resource(show_spinner="Loading PhishGuard AI Engine...")
+@st.cache_resource(show_spinner="Loading PhishGuard AI Model...")
 def load_engine():
     return PhishGuardInference(MODELS_DIR)
 
 engine = load_engine()
 
 # ============================================
-# Predefined Scenarios (Session State Integrated)
-# ============================================
-# ============================================
-# Predefined Scenarios (Session State Integrated)
+# 4 Clean Presets
 # ============================================
 SCENARIOS = {
     "🚨 Credential Phish": {
@@ -585,31 +463,25 @@ st.markdown(
         <div class="brand-logo">🛡️</div>
         <div>
             <div class="brand-title">PhishGuard <span>AI</span></div>
-            <div class="brand-sub">NLP-Driven Email Threat Intelligence & Risk Ranking Engine</div>
+            <div class="brand-sub">NLP-Driven Email Threat Intelligence & Risk Ranking System</div>
         </div>
     </div>
     <div class="header-badges">
-        <span class="pill-badge badge-ai">Linear SVM + TF-IDF · 98.64% Accuracy</span>
-        <div class="student-badge">
+        <span class="badge-pill">Linear SVM · 98.64% Accuracy</span>
+        <div class="student-card">
             <div class="student-name">Muhammad Haris</div>
             <div class="student-meta">S.No: 70 · KPITB AI/ML Capstone Project</div>
         </div>
     </div>
-</div>
-
-<div class="context-bar">
-    <div><strong>Corpus:</strong> 17,960 Verified Emails (Enron + Kaggle)</div>
-    <div><strong>Features:</strong> 10,020 NLP Dimensions (TF-IDF N-Grams + Domain Indicators)</div>
-    <div><strong>Classifier:</strong> Calibrated L2 LinearSVC (C=1.0) · Zero Data Leakage</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
 # ============================================
-# 1-CLICK PRESET BUTTONS
+# 4 SCENARIO PRESET BUTTONS (1-CLICK LOAD)
 # ============================================
-st.markdown('<div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 4px;">⚡ Load Test Scenarios (1-Click):</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 6px;">⚡ Quick Test Scenarios (Click to Load):</div>', unsafe_allow_html=True)
 p_cols = st.columns(4)
 
 for i, name in enumerate(SCENARIOS.keys()):
@@ -623,19 +495,19 @@ for i, name in enumerate(SCENARIOS.keys()):
 st.write("")
 
 # ============================================
-# MAIN 2-COLUMN WORKSTATION
+# MAIN 2-COLUMN UNIFIED WORKSTATION
 # ============================================
-col_left, col_right = st.columns([1, 1], gap="medium")
+col_left, col_right = st.columns([1, 1], gap="large")
 
 # --------------------------------------------
-# LEFT COLUMN: Ingestion Form
+# LEFT: Clean Ingestion Form
 # --------------------------------------------
 with col_left:
     st.markdown(
         """
-    <div class="card-title">
-        <span>1. Threat Vector Ingestion</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #2563eb;">Input Console</span>
+    <div class="section-title">
+        <span>1. Email & Link Input Console</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #2563eb;">Live Ingestion</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -651,28 +523,28 @@ with col_left:
             )
         with c_s2:
             subject_val = st.text_input(
-                "Email Subject",
+                "Email Subject Header",
                 key="form_subject_input",
-                placeholder="e.g. Unusual sign-in attempt",
+                placeholder="e.g. Account Security Alert",
             )
 
         body_val = st.text_area(
-            "Email Body Content, Links, or Raw Text:",
+            "Email Body Content, Suspicious Links, or Raw Text:",
             key="form_body_input",
-            height=190,
+            height=210,
             max_chars=MAX_EMAIL_LENGTH,
-            placeholder="Paste complete email body or suspicious URLs...",
+            placeholder="Paste complete email body or suspicious URLs here...",
         )
 
-        # Dynamic alerts right in the form
+        # High-visibility alerts if typosquatting or payload present
         if sender_val and "rnicrosoft" in sender_val.lower():
             st.markdown(
-                '<div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; color: #b45309; margin-bottom: 8px;">⚠️ <strong>Homoglyph Typosquatting:</strong> \'rn\' substitutes for \'m\' (<code>rnicrosoft.com</code> simulates <code>microsoft.com</code>)</div>',
+                '<div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #b45309; margin-bottom: 10px;">⚠️ <strong>Homoglyph Spoof:</strong> \'rn\' simulates \'m\' (<code>rnicrosoft.com</code> vs <code>microsoft.com</code>)</div>',
                 unsafe_allow_html=True,
             )
         if body_val and any(ext in body_val.lower() for ext in [".exe", ".scr", ".bat", ".pdf.exe"]):
             st.markdown(
-                '<div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; color: #dc2626; margin-bottom: 8px;">📎 <strong>Payload Flag:</strong> Dangerous executable mention detected in content</div>',
+                '<div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #dc2626; margin-bottom: 10px;">📎 <strong>Payload Alert:</strong> Executable attachment mention detected (<code>.exe / binary</code>)</div>',
                 unsafe_allow_html=True,
             )
 
@@ -681,46 +553,15 @@ with col_left:
             use_container_width=True,
         )
 
-    # Pre-Classification Feature Telemetry
-    active_text = body_val if body_val else st.session_state.get("form_body_input", "")
-    entropy = compute_shannon_entropy(active_text)
-    tok_count = len(active_text.split()) if active_text else 0
-    link_count = len(re.findall(r"https?://\S+|www\.\S+", active_text)) if active_text else 0
-
-    st.markdown(
-        f"""
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-top: 10px;">
-        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace;">
-            Pre-Classification Feature Telemetry:
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px;">
-                <div style="font-size: 9px; color: #64748b;">Word Tokens</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #0f172a;">{tok_count}</div>
-            </div>
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px;">
-                <div style="font-size: 9px; color: #64748b;">Shannon Entropy</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #0f172a;">{entropy} <small style="font-size: 9px;">bits</small></div>
-            </div>
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px;">
-                <div style="font-size: 9px; color: #64748b;">Hyperlinks Found</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #0f172a;">{link_count}</div>
-            </div>
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
 # --------------------------------------------
-# RIGHT COLUMN: Real-Time AI Verdict & Explainability
+# RIGHT: AI Verdict, Risk Score & Explainability
 # --------------------------------------------
 with col_right:
     st.markdown(
         """
-    <div class="card-title">
-        <span>2. AI Verdict & Threat Ranking</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #059669;">● Live Prediction</span>
+    <div class="section-title">
+        <span>2. AI Classification & Threat Ranking</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #059669;">Model Output</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -731,80 +572,70 @@ with col_right:
     curr_sender = sender_val if sender_val else st.session_state.get("form_sender_input", "")
 
     if not curr_body.strip() and not curr_subj.strip():
-        st.info("Enter email text or select a preset scenario to classify.")
+        st.info("Please enter email text or click a quick scenario on the left.")
     else:
         start_t = datetime.datetime.now()
         res = engine.analyze(text=curr_body, subject=curr_subj, sender=curr_sender)
         latency_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
 
-        # Verdict Styling
+        # Class styles
         if res.prediction == "LEGITIMATE":
-            vb_class = "vb-legit"
-            vt_class = "vt-legit"
-            v_badge = '<span style="background: #d1fae5; color: #065f46; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; border: 1px solid #6ee7b7;">● VERIFIED BENIGN</span>'
+            v_cls = "vc-legit"
+            vt_cls = "vh-legit"
+            v_tag = '<span class="status-tag stag-legit">● VERIFIED SAFE</span>'
         elif res.prediction == "PHISHING":
-            vb_class = "vb-phish"
-            vt_class = "vt-phish"
-            v_badge = '<span style="background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; border: 1px solid #fca5a5;">● PHISHING DETECTED</span>'
+            v_cls = "vc-phish"
+            vt_cls = "vh-phish"
+            v_tag = '<span class="status-tag stag-phish">● PHISHING DETECTED</span>'
         else:
-            vb_class = "vb-mal"
-            vt_class = "vt-mal"
-            v_badge = '<span style="background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; border: 1px solid #fca5a5;">● MALICIOUS ATTACK</span>'
+            v_cls = "vc-mal"
+            vt_cls = "vh-mal"
+            v_tag = '<span class="status-tag stag-mal">● MALICIOUS ATTACK</span>'
 
-        # 1. Verdict Banner
+        # 1. Big Hero Verdict Banner
         st.markdown(
             f"""
-        <div class="verdict-banner {vb_class}">
+        <div class="verdict-card {v_cls}">
             <div>
-                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; font-family: 'JetBrains Mono', monospace;">
                     Model Classification
                 </div>
-                <div class="vb-title {vt_class}">{res.prediction}</div>
-                <div style="font-size: 11px; color: #475569; margin-top: 2px;">
+                <div class="verdict-headline {vt_cls}">{res.prediction}</div>
+                <div style="font-size: 12px; color: #475569; margin-top: 3px;">
                     Inference Time: <strong>{latency_ms:.1f}ms</strong> &nbsp;|&nbsp; Calibrated Decision Margin
                 </div>
             </div>
             <div style="text-align: right;">
-                {v_badge}
-                <div style="margin-top: 8px;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600;">Composite Risk</div>
-                    <div class="score-chip" style="color: {res.risk_color};">{int(res.risk_score * 100)} <span style="font-size: 14px; font-weight: 500; color: #64748b;">/ 100</span></div>
-                </div>
+                {v_tag}
             </div>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
-        # 2. Key Metrics Row
-        margin_dist = f"+{res.confidence * 2.612:.2f} σ" if res.prediction != "LEGITIMATE" else f"-{res.confidence * 1.842:.2f} σ"
-
+        # 2. Big KPI Cards: Risk Score & Confidence
+        risk_int = int(res.risk_score * 100)
         st.markdown(
             f"""
-        <div class="metrics-row">
-            <div class="metric-box">
-                <div class="metric-label">Model Confidence</div>
-                <div class="metric-val">{res.confidence:.1%}</div>
-                <div class="metric-sub">Platt-Calibrated SVM</div>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-title">Composite Risk Score</div>
+                <div class="kpi-big" style="color: {res.risk_color};">{risk_int} <span style="font-size: 16px; font-weight: 600; color: #64748b;">/ 100</span></div>
+                <div class="kpi-subtext">Severity Level: <strong>{res.risk_level}</strong></div>
             </div>
-            <div class="metric-box">
-                <div class="metric-label">Risk Severity</div>
-                <div class="metric-val" style="color: {res.risk_color};">{res.risk_level}</div>
-                <div class="metric-sub">Composite Severity Rank</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">Hyperplane Margin</div>
-                <div class="metric-val" style="font-size: 16px; margin-top: 5px;">{margin_dist}</div>
-                <div class="metric-sub">Distance from Boundary</div>
+            <div class="kpi-card">
+                <div class="kpi-title">Model Confidence</div>
+                <div class="kpi-big" style="color: #0f172a;">{res.confidence:.1%}</div>
+                <div class="kpi-subtext">Platt-Calibrated Posterior Probability</div>
             </div>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
-        # 3. Probability Distribution Bars
+        # 3. Class Probability Distribution Bar Chart
         st.markdown(
-            '<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px; font-family: \'JetBrains Mono\', monospace;">Posterior Class Probabilities (CalibratedClassifierCV):</div>',
+            '<div style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 2px; font-family: \'JetBrains Mono\', monospace;">Class Probability Distribution:</div>',
             unsafe_allow_html=True,
         )
         prob_chart = go.Figure(
@@ -823,197 +654,65 @@ with col_right:
                     f"{res.probabilities.get('MALICIOUS', 0):.1%}",
                 ],
                 textposition="inside",
-                textfont=dict(size=11, family="JetBrains Mono", color="white"),
+                textfont=dict(size=12, family="JetBrains Mono", color="white"),
             )
         )
         prob_chart.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            height=85,
-            margin=dict(l=0, r=20, t=2, b=2),
+            height=100,
+            margin=dict(l=0, r=20, t=4, b=4),
             xaxis=dict(range=[0, 100], showgrid=False, showticklabels=False),
-            yaxis=dict(showgrid=False, tickfont=dict(size=10, family="JetBrains Mono", color="#334155"), autorange="reversed"),
-            bargap=0.25,
+            yaxis=dict(showgrid=False, tickfont=dict(size=11, family="JetBrains Mono", color="#334155"), autorange="reversed"),
+            bargap=0.22,
         )
         st.plotly_chart(prob_chart, use_container_width=True, config={"displayModeBar": False})
 
-        # 4. Explainable AI (XAI) Attribution: The "WHY"
+        # 4. Explainable AI: The "WHY"
         st.markdown(
             """
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #1e3a8a; margin: 8px 0 4px 0; font-family: 'JetBrains Mono', monospace;">
-            🔍 Explainable AI (XAI): Why Was This Prediction Made?
+        <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #1e3a8a; margin: 12px 0 6px 0; font-family: 'JetBrains Mono', monospace;">
+            🔍 Explainable AI (XAI): Words Triggering the Decision
         </div>
         """,
             unsafe_allow_html=True,
         )
 
-        col_t1, col_t2 = st.columns(2)
-        with col_t1:
-            st.markdown('<div style="font-size: 10px; font-weight: 700; color: #dc2626; font-family: \'JetBrains Mono\', monospace;">TOP THREAT SIGNALS (+ WEIGHTS):</div>', unsafe_allow_html=True)
+        col_x1, col_x2 = st.columns(2)
+        with col_x1:
+            st.markdown('<div style="font-size: 11px; font-weight: 700; color: #dc2626; font-family: \'JetBrains Mono\', monospace; margin-bottom: 3px;">THREAT SIGNALS (+ SVM WEIGHT):</div>', unsafe_allow_html=True)
             if res.top_threat_tokens:
                 chips_threat = "".join([f'<span class="token-chip tc-threat">{t["token"]} +{abs(t["impact"]):.2f}</span>' for t in res.top_threat_tokens[:5]])
                 st.markdown(chips_threat, unsafe_allow_html=True)
             else:
                 st.caption("No positive threat features found.")
 
-        with col_t2:
-            st.markdown('<div style="font-size: 10px; font-weight: 700; color: #059669; font-family: \'JetBrains Mono\', monospace;">TOP SAFE SIGNALS (- WEIGHTS):</div>', unsafe_allow_html=True)
+        with col_x2:
+            st.markdown('<div style="font-size: 11px; font-weight: 700; color: #059669; font-family: \'JetBrains Mono\', monospace; margin-bottom: 3px;">SAFE SIGNALS (- SVM WEIGHT):</div>', unsafe_allow_html=True)
             if res.top_safe_tokens:
                 chips_safe = "".join([f'<span class="token-chip tc-safe">{t["token"]} -{abs(t["impact"]):.2f}</span>' for t in res.top_safe_tokens[:5]])
                 st.markdown(chips_safe, unsafe_allow_html=True)
             else:
                 st.caption("No positive benign features found.")
 
-        # Actionable Recommendation
+        # Action Recommendation
         st.markdown(
             f"""
-        <div style="margin-top: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; color: #334155;">
-            <strong>Recommended Action:</strong> {res.recommendation}
+        <div style="margin-top: 12px; padding: 10px 14px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 12.5px; color: #1e293b;">
+            <strong>Recommended Security Action:</strong> {res.recommendation}
         </div>
         """,
             unsafe_allow_html=True,
         )
 
 # ============================================
-# STEP-BY-STEP NLP PIPELINE EXECUTION TRACE
-# ============================================
-st.write("")
-st.markdown(
-    """
-<div class="card-title">
-    <span>3. End-to-End NLP Transformation Pipeline</span>
-    <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #2563eb;">Deterministic 5-Stage Execution</span>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-trace_data = res.pipeline_trace if "res" in locals() and res else {}
-p1, p2, p3, p4, p5 = st.columns(5)
-
-with p1:
-    st.markdown(
-        f"""
-    <div class="pipe-step-box">
-        <div class="pipe-step-num">STAGE 01</div>
-        <div class="pipe-step-title">Raw Ingest</div>
-        <div class="pipe-step-meta">{trace_data.get('raw_word_count', 148)} Words Parsed</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with p2:
-    st.markdown(
-        """
-    <div class="pipe-step-box">
-        <div class="pipe-step-num">STAGE 02</div>
-        <div class="pipe-step-title">Regex Cleaning</div>
-        <div class="pipe-step-meta">URLs, Emails & HTML Stripped</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with p3:
-    st.markdown(
-        f"""
-    <div class="pipe-step-box">
-        <div class="pipe-step-num">STAGE 03</div>
-        <div class="pipe-step-title">NLTK Lemmatize</div>
-        <div class="pipe-step-meta">{trace_data.get('token_count', 92)} Tokens Normalized</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with p4:
-    st.markdown(
-        f"""
-    <div class="pipe-step-box">
-        <div class="pipe-step-num">STAGE 04</div>
-        <div class="pipe-step-title">TF-IDF Vectorizer</div>
-        <div class="pipe-step-meta">10,020 Sparse Features</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with p5:
-    st.markdown(
-        f"""
-    <div class="pipe-step-box" style="border-color: #93c5fd; background: #eff6ff;">
-        <div class="pipe-step-num">STAGE 05</div>
-        <div class="pipe-step-title">Linear SVM</div>
-        <div class="pipe-step-meta">Margin: {margin_dist if 'margin_dist' in locals() else '+2.61 σ'}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-# ============================================
-# VIVA DEFENSE TALKING POINTS (Examiner Reference)
-# ============================================
-st.write("")
-st.markdown(
-    """
-<div class="card-title">
-    <span>4. Viva Defense Talking Points (How to Explain Your Project)</span>
-    <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #2563eb;">Technical Defense Matrix</span>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-v_col1, v_col2, v_col3 = st.columns(3)
-
-with v_col1:
-    st.markdown(
-        """
-    <div class="viva-box">
-        <div class="viva-title">Q1: Why Linear SVM instead of Deep Learning?</div>
-        <div class="viva-desc">
-            In high-dimensional sparse text spaces (10,020 features), text is largely linearly separable. Linear SVM maximizes the margin between classes, prevents overfitting, and executes in ~34ms without needing heavy GPU infrastructure.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with v_col2:
-    st.markdown(
-        """
-    <div class="viva-box">
-        <div class="viva-title">Q2: How do you guarantee Zero Data Leakage?</div>
-        <div class="viva-desc">
-            We performed strict stratified train/val/test splitting (70/10/20) BEFORE fitting the TF-IDF vectorizer. The 3,592 test samples were strictly unseen during training, confirming an authentic 98.64% test accuracy.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with v_col3:
-    st.markdown(
-        """
-    <div class="viva-box">
-        <div class="viva-title">Q3: How do you catch typosquatting like 'rnicrosoft.com'?</div>
-        <div class="viva-desc">
-            We implemented a Levenshtein-distance analyzer comparing sender domains against 23 enterprise brands. An edit distance of 1 flags homoglyph substitution and elevates the risk level to prevent cognitive bypass.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-# ============================================
-# FOOTER
+# CLEAN FOOTER
 # ============================================
 st.markdown(
     """
-<div style="text-align: center; color: #64748b; font-size: 11px; padding-top: 16px; border-top: 1px solid #e2e8f0; margin-top: 20px;">
+<div style="text-align: center; color: #64748b; font-size: 12px; padding-top: 18px; border-top: 1.5px solid #e2e8f0; margin-top: 24px;">
     <strong>PhishGuard AI</strong> · Final Capstone Project · KPITB AI/ML Training Program<br>
-    Developed by <strong>Muhammad Haris</strong> (S.No: 70) · 58 Automated Tests Passing · Test Accuracy: 98.64% (Macro F1: 0.9761)
+    Developed by <strong>Muhammad Haris</strong> (S.No: 70) · Model: Calibrated Linear SVM (10,020 Features) · Test Accuracy: 98.64%
 </div>
 """,
     unsafe_allow_html=True,
